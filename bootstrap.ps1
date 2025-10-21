@@ -3,7 +3,7 @@
 # dotfiles-win Bootstrap Installer
 # ================================================================================
 # One-line installation:
-#   iwr -useb https://raw.githubusercontent.com/USER/dotfiles-win/main/bootstrap.ps1 | iex
+#   iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #
 # What this does:
 #   1. Checks prerequisites (winget)
@@ -17,11 +17,11 @@
 
 param(
     [switch]$DryRun,
-    [string]$Branch = "main"
+    [string]$Branch = "master"
 )
 
 # Configuration
-$RepoOwner = "USER"  # TODO: Replace with actual GitHub username
+$RepoOwner = "alejakun"
 $RepoName = "dotfiles-win"
 $BaseUrl = "https://raw.githubusercontent.com/$RepoOwner/$RepoName/$Branch"
 $InstallDir = Join-Path $env:TEMP "dotfiles-win-install"
