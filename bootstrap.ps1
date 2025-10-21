@@ -141,24 +141,27 @@ try {
     $packagesDest = Join-Path $wingetDir "packages.txt"
     Move-Item -Path $packagesSource -Destination $packagesDest -Force
 
-    # Execute install.ps1
+    # Execute install.ps1 in the correct directory
     $installScript = Join-Path $InstallDir "install.ps1"
 
-    # Execute PowerShell with working directory set to install directory
-    if ($DryRun) {
-        $exitCode = Start-Process -FilePath "powershell.exe" `
-            -ArgumentList "-ExecutionPolicy", "Bypass", "-NoProfile", "-File", "`"$installScript`"", "-DryRun" `
-            -WorkingDirectory $InstallDir `
-            -Wait `
-            -NoNewWindow `
-            -PassThru | Select-Object -ExpandProperty ExitCode
-    } else {
-        $exitCode = Start-Process -FilePath "powershell.exe" `
-            -ArgumentList "-ExecutionPolicy", "Bypass", "-NoProfile", "-File", "`"$installScript`"" `
-            -WorkingDirectory $InstallDir `
-            -Wait `
-            -NoNewWindow `
-            -PassThru | Select-Object -ExpandProperty ExitCode
+    # Save current location
+    $previousLocation = Get-Location
+
+    try {
+        # Change to install directory
+        Set-Location $InstallDir
+
+        # Execute the script directly
+        if ($DryRun) {
+            & $installScript -DryRun
+        } else {
+            & $installScript
+        }
+
+        $exitCode = $LASTEXITCODE
+    } finally {
+        # Restore previous location
+        Set-Location $previousLocation
     }
 
     Write-Host ""
