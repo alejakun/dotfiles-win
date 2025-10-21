@@ -35,6 +35,7 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 
 ### Development Tools
 - **Git** - Version control
+- **GitHub CLI** - GitHub command line tool
 - **Visual Studio Code** - Code editor
 - **Claude Code** - AI-powered coding assistant CLI
 - **Python 3.12** - Python programming language
