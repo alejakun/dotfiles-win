@@ -1,0 +1,39 @@
+# ================================================================================
+# Windows Package Installation List
+# ================================================================================
+# Install via: winget install --id <PackageId>
+#
+# Note: Some packages may require manual installation (see MANUAL_INSTALL.md)
+
+# Development Tools
+Git.Git
+Microsoft.VisualStudioCode
+
+# Browsers
+Google.Chrome
+Mozilla.Firefox
+
+# Productivity
+7zip.7zip
+
+# Security
+Bitwarden.Bitwarden
+
+# Communication
+Rambox.Rambox
+
+# Utilities
+Doxie.Doxie
+
+# Remote Access
+TeamViewer.TeamViewer
+AnyDesk.AnyDesk
+
+# Viewers
+Adobe.Acrobat.Reader.64-bit
+
+# Geographic Tools
+Google.EarthPro
+
+# Office Suite (may require manual installation - see MANUAL_INSTALL.md)
+# Microsoft.Office
