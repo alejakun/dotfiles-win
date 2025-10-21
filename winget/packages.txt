@@ -8,6 +8,7 @@
 # Development Tools
 Git.Git
 Microsoft.VisualStudioCode
+Anthropic.ClaudeCode
 
 # Browsers
 Google.Chrome
