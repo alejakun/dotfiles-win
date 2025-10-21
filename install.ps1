@@ -63,6 +63,10 @@ if (-not (Test-Path $packageFile)) {
 }
 
 Write-Step "Reading package list from: $packageFile"
+Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
+Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
+Write-Host "Package file exists: $(Test-Path $packageFile)" -ForegroundColor Gray
+
 $packages = Get-Content $packageFile | Where-Object {
     $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
 }
