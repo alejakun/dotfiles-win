@@ -36,6 +36,48 @@ Some applications may not be available via winget or require manual installation
 
 ---
 
+## Kaspersky Antivirus
+
+**Status:** ⚠️ Not available in winget - Requires manual installation
+
+**Why manual:**
+- Kaspersky products are not available in the official winget repository
+- Requires license activation and account registration
+- Different product tiers (Standard, Plus, Premium)
+
+**Installation:**
+
+1. **Download from official site:**
+   - Visit: https://www.kaspersky.com/
+   - Select your product (Standard, Plus, or Premium)
+   - Download installer
+
+2. **Run installer:**
+   - Execute downloaded file
+   - Follow installation wizard
+   - Accept license agreement
+
+3. **Activation:**
+   - Enter activation code (if purchased)
+   - Create or sign in to My Kaspersky account
+   - Complete activation process
+
+**Product Options:**
+- **Kaspersky Standard** - Essential antivirus protection
+- **Kaspersky Plus** - Standard + VPN and privacy tools
+- **Kaspersky Premium** - Plus + identity protection
+
+**Alternative (Free):**
+- **Windows Defender** - Built-in Windows protection (already installed)
+- **Malwarebytes Free** - Download from https://www.malwarebytes.com/
+
+**Note:** Kaspersky may become available in winget in the future. Check with:
+```powershell
+winget search kaspersky
+```
+
+---
+
 ## Adobe Acrobat Reader
 
 **Status:** ✅ Usually available via winget as `Adobe.Acrobat.Reader.64-bit`
