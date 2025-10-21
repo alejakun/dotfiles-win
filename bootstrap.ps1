@@ -106,12 +106,14 @@ $files = @(
 $downloadSuccess = $true
 foreach ($file in $files) {
     Write-Host "  Downloading: $($file.Name)..." -ForegroundColor Yellow
+    Write-Host "    URL: $($file.Url)" -ForegroundColor Gray
 
     try {
         Invoke-WebRequest -Uri $file.Url -OutFile $file.Path -UseBasicParsing
         Write-Success "    Downloaded: $($file.Name)"
     } catch {
         Write-Error "    Failed to download: $($file.Name)"
+        Write-Host "    URL: $($file.Url)" -ForegroundColor Gray
         Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Gray
         $downloadSuccess = $false
     }
