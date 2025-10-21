@@ -5,11 +5,15 @@
 # Installs common applications using winget
 #
 # Usage:
-#   .\install.ps1           # Install all packages
-#   .\install.ps1 -DryRun   # Show what would be installed
+#   .\install.ps1                # Install all packages
+#   .\install.ps1 -DryRun        # Show what would be installed
+#   .\install.ps1 -ShowCommands  # Display individual winget commands
+#   .\install.ps1 -Help          # Show help message
 
 param(
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$ShowCommands,
+    [switch]$Help
 )
 
 # Colors for output
@@ -31,6 +35,32 @@ function Write-Warning {
 function Write-Error {
     param([string]$Message)
     Write-Host "[-] $Message" -ForegroundColor Red
+}
+
+# Show help if requested
+if ($Help) {
+    Write-Host ""
+    Write-Host "=====================================" -ForegroundColor Cyan
+    Write-Host "Windows Applications Installer - Help" -ForegroundColor Cyan
+    Write-Host "=====================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "USAGE:" -ForegroundColor Yellow
+    Write-Host "  .\install.ps1                 Install all packages from winget\packages.txt"
+    Write-Host "  .\install.ps1 -DryRun         Preview packages without installing"
+    Write-Host "  .\install.ps1 -ShowCommands   Display individual winget commands"
+    Write-Host "  .\install.ps1 -Help           Show this help message"
+    Write-Host ""
+    Write-Host "EXAMPLES:" -ForegroundColor Yellow
+    Write-Host "  # Preview what would be installed"
+    Write-Host "  .\install.ps1 -DryRun"
+    Write-Host ""
+    Write-Host "  # See individual commands to copy/paste"
+    Write-Host "  .\install.ps1 -ShowCommands"
+    Write-Host ""
+    Write-Host "  # Install everything"
+    Write-Host "  .\install.ps1"
+    Write-Host ""
+    exit 0
 }
 
 # Header
@@ -73,6 +103,23 @@ $packages = Get-Content $packageFile | Where-Object {
 
 Write-Host "Found $($packages.Count) packages to install" -ForegroundColor White
 Write-Host ""
+
+# Show commands mode
+if ($ShowCommands) {
+    Write-Host "=====================================" -ForegroundColor Cyan
+    Write-Host "Individual Installation Commands" -ForegroundColor Cyan
+    Write-Host "=====================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Copy and paste these commands to install packages individually:" -ForegroundColor Yellow
+    Write-Host ""
+    $packages | ForEach-Object {
+        Write-Host "winget install --id $_ -e --source winget" -ForegroundColor Green
+    }
+    Write-Host ""
+    Write-Host "TIP: Use these commands to install only specific packages" -ForegroundColor Cyan
+    Write-Host ""
+    exit 0
+}
 
 # Dry run mode
 if ($DryRun) {
