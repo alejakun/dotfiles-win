@@ -144,27 +144,42 @@ $skipped = 0
 $failedPackages = @()
 
 foreach ($package in $packages) {
-    Write-Host "[>] Installing: $package" -ForegroundColor Yellow
+    Write-Host "[>] Processing: $package" -ForegroundColor Yellow
 
-    try {
-        $result = winget install --id $package --silent --accept-package-agreements --accept-source-agreements 2>&1
+    # Check if already installed (fast check)
+    $checkResult = winget list --id $package --exact 2>&1
+    $isInstalled = $LASTEXITCODE -eq 0
 
-        if ($LASTEXITCODE -eq 0) {
-            Write-Success "  Installed: $package"
-            $installed++
-        } elseif ($result -match "already installed") {
-            Write-Host "  [=] Already installed: $package" -ForegroundColor Gray
-            $skipped++
-        } else {
-            Write-Warning "  Failed: $package"
+    if ($isInstalled) {
+        Write-Host "  [=] Already installed: $package" -ForegroundColor Gray
+        $skipped++
+    } else {
+        # Not installed, proceed with installation
+        Write-Host "  [*] Installing..." -ForegroundColor Cyan
+
+        try {
+            $installResult = winget install --id $package --exact --silent --accept-package-agreements --accept-source-agreements 2>&1
+
+            if ($LASTEXITCODE -eq 0) {
+                Write-Success "  Installed: $package"
+                $installed++
+            } else {
+                Write-Warning "  Failed: $package"
+                Write-Host "  Error details:" -ForegroundColor Gray
+                $installResult | ForEach-Object {
+                    if ($_ -and $_ -notmatch '^\s*$') {
+                        Write-Host "    $_" -ForegroundColor DarkGray
+                    }
+                }
+                $failed++
+                $failedPackages += $package
+            }
+        } catch {
+            Write-Warning "  Error installing: $package"
+            Write-Host "    $($_.Exception.Message)" -ForegroundColor Gray
             $failed++
             $failedPackages += $package
         }
-    } catch {
-        Write-Warning "  Error installing: $package"
-        Write-Host "    $($_.Exception.Message)" -ForegroundColor Gray
-        $failed++
-        $failedPackages += $package
     }
 
     Write-Host ""
