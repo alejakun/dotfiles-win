@@ -202,6 +202,31 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ---
 
+## 📝 Notes
+
+### After Installation
+
+Some applications add commands to PATH. To use them in terminals:
+
+- **New PowerShell/Terminal**: Works immediately after installation
+- **VSCode**: Requires **full application restart** (not just terminal reload)
+- **Existing terminals**: Must be restarted to recognize new PATH
+
+**Example:**
+
+After installing Claude Code via winget:
+1. Close VSCode completely (not just the terminal)
+2. Reopen VSCode
+3. Now `claude` command will work in integrated terminal
+
+**Quick test:**
+```powershell
+# Restart terminal/VSCode, then:
+claude --version
+```
+
+---
+
 ## 📁 Structure
 
 ```
