@@ -105,6 +105,28 @@ cd dotfiles-win
 .\install.ps1 -DryRun
 ```
 
+### 4. Show individual commands
+
+Get individual winget commands to copy/paste for selective installation:
+
+```powershell
+.\install.ps1 -ShowCommands
+```
+
+This displays commands like:
+```powershell
+winget install --id Git.Git -e --source winget
+winget install --id Anthropic.ClaudeCode -e --source winget
+```
+
+Useful when you only want to install 1-2 specific packages.
+
+### 5. Show help
+
+```powershell
+.\install.ps1 -Help
+```
+
 ---
 
 ## ✏️ Customization
