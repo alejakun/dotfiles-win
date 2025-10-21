@@ -11,10 +11,8 @@
 Open **PowerShell** and run:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/USER/dotfiles-win/main/bootstrap.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 ```
-
-> **⚠️ Important:** Replace `USER` with your GitHub username before running.
 
 This will automatically:
 - Check prerequisites (winget)
@@ -28,7 +26,7 @@ This will automatically:
 To see what would be installed without actually installing:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/USER/dotfiles-win/main/bootstrap.ps1 | iex -DryRun
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex -DryRun
 ```
 
 ---
@@ -90,7 +88,7 @@ If you prefer to clone the repository and run locally:
 ### 1. Clone the repository
 
 ```powershell
-git clone https://github.com/USER/dotfiles-win.git
+git clone https://github.com/alejakun/dotfiles-win.git
 cd dotfiles-win
 ```
 
