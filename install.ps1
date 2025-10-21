@@ -15,22 +15,22 @@ param(
 # Colors for output
 function Write-Step {
     param([string]$Message)
-    Write-Host "🔧 $Message" -ForegroundColor Cyan
+    Write-Host "[*] $Message" -ForegroundColor Cyan
 }
 
 function Write-Success {
     param([string]$Message)
-    Write-Host "✅ $Message" -ForegroundColor Green
+    Write-Host "[+] $Message" -ForegroundColor Green
 }
 
 function Write-Warning {
     param([string]$Message)
-    Write-Host "⚠️  $Message" -ForegroundColor Yellow
+    Write-Host "[!] $Message" -ForegroundColor Yellow
 }
 
 function Write-Error {
     param([string]$Message)
-    Write-Host "❌ $Message" -ForegroundColor Red
+    Write-Host "[-] $Message" -ForegroundColor Red
 }
 
 # Header
@@ -97,7 +97,7 @@ $skipped = 0
 $failedPackages = @()
 
 foreach ($package in $packages) {
-    Write-Host "📦 Installing: $package" -ForegroundColor Yellow
+    Write-Host "[>] Installing: $package" -ForegroundColor Yellow
 
     try {
         $result = winget install --id $package --silent --accept-package-agreements --accept-source-agreements 2>&1
@@ -106,7 +106,7 @@ foreach ($package in $packages) {
             Write-Success "  Installed: $package"
             $installed++
         } elseif ($result -match "already installed") {
-            Write-Host "  ⏭️  Already installed: $package" -ForegroundColor Gray
+            Write-Host "  [=] Already installed: $package" -ForegroundColor Gray
             $skipped++
         } else {
             Write-Warning "  Failed: $package"
@@ -128,9 +128,9 @@ Write-Host ""
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host "Installation Summary" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
-Write-Host "✅ Installed:        $installed" -ForegroundColor Green
-Write-Host "⏭️  Already installed: $skipped" -ForegroundColor Gray
-Write-Host "❌ Failed:           $failed" -ForegroundColor Red
+Write-Host "[+] Installed:        $installed" -ForegroundColor Green
+Write-Host "[=] Already installed: $skipped" -ForegroundColor Gray
+Write-Host "[-] Failed:           $failed" -ForegroundColor Red
 Write-Host ""
 
 if ($failed -gt 0) {

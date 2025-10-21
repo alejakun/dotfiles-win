@@ -29,22 +29,22 @@ $InstallDir = Join-Path $env:TEMP "dotfiles-win-install"
 # Colors for output
 function Write-Step {
     param([string]$Message)
-    Write-Host "🔧 $Message" -ForegroundColor Cyan
+    Write-Host "[*] $Message" -ForegroundColor Cyan
 }
 
 function Write-Success {
     param([string]$Message)
-    Write-Host "✅ $Message" -ForegroundColor Green
+    Write-Host "[+] $Message" -ForegroundColor Green
 }
 
 function Write-Warning {
     param([string]$Message)
-    Write-Host "⚠️  $Message" -ForegroundColor Yellow
+    Write-Host "[!] $Message" -ForegroundColor Yellow
 }
 
 function Write-Error {
     param([string]$Message)
-    Write-Host "❌ $Message" -ForegroundColor Red
+    Write-Host "[-] $Message" -ForegroundColor Red
 }
 
 # Header
