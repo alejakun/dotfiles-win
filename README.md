@@ -1,0 +1,234 @@
+# dotfiles-win
+
+> Automated Windows application installation using winget
+
+---
+
+## 🚀 Quick Start
+
+### One-Line Installation
+
+Open **PowerShell** and run:
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/USER/dotfiles-win/main/bootstrap.ps1 | iex
+```
+
+> **⚠️ Important:** Replace `USER` with your GitHub username before running.
+
+This will automatically:
+- Check prerequisites (winget)
+- Download installation files
+- Install all applications listed in `winget/packages.txt`
+
+---
+
+### Preview Mode (Dry Run)
+
+To see what would be installed without actually installing:
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/USER/dotfiles-win/main/bootstrap.ps1 | iex -DryRun
+```
+
+---
+
+## 📦 Included Applications
+
+### Development Tools
+- **Git** - Version control
+- **Visual Studio Code** - Code editor
+
+### Browsers
+- **Google Chrome** - Web browser
+- **Mozilla Firefox** - Web browser
+
+### Productivity
+- **7-Zip** - File compression
+
+### Security
+- **Bitwarden** - Password manager
+
+### Design & CAD
+- **AutoCAD** - CAD software
+
+### Remote Access
+- **TeamViewer** - Remote desktop
+- **AnyDesk** - Remote desktop
+
+### Viewers
+- **Adobe Acrobat Reader** - PDF viewer
+
+### Geographic Tools
+- **Google Earth Pro** - 3D globe viewer
+
+### Office Suite
+- **Microsoft Office** - ⚠️ Commented out, requires manual installation
+
+---
+
+## 📋 Prerequisites
+
+- **Windows 10** (version 1809+) or **Windows 11**
+- **winget** (Windows Package Manager) - Pre-installed on Windows 11
+- **PowerShell 5.0+** - Pre-installed on modern Windows
+
+### Check if winget is installed
+
+```powershell
+winget --version
+```
+
+If not installed, get it from [Microsoft Store](https://www.microsoft.com/p/app-installer/9nblggh4nns1).
+
+---
+
+## 🛠️ Manual Installation
+
+If you prefer to clone the repository and run locally:
+
+### 1. Clone the repository
+
+```powershell
+git clone https://github.com/USER/dotfiles-win.git
+cd dotfiles-win
+```
+
+### 2. Run the installer
+
+```powershell
+.\install.ps1
+```
+
+### 3. Dry run mode
+
+```powershell
+.\install.ps1 -DryRun
+```
+
+---
+
+## ✏️ Customization
+
+### Adding Applications
+
+1. Find the package ID:
+   ```powershell
+   winget search "App Name"
+   ```
+
+2. Add to `winget/packages.txt`:
+   ```txt
+   # My additions
+   Notepad++.Notepad++
+   VideoLAN.VLC
+   ```
+
+3. Run installer again
+
+### Removing Applications
+
+Comment out or delete lines in `winget/packages.txt`:
+
+```txt
+# Mozilla.Firefox  # Don't install Firefox
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### "winget not found"
+
+**Solution:**
+1. Install App Installer from [Microsoft Store](https://www.microsoft.com/p/app-installer/9nblggh4nns1)
+2. Restart PowerShell
+3. Verify: `winget --version`
+
+---
+
+### "Access denied"
+
+**Solution:**
+- Run PowerShell as Administrator
+- Right-click Start → Windows Terminal (Admin)
+
+---
+
+### "Execution policy" error
+
+**Solution:**
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+---
+
+### Package installation fails
+
+1. **Check if package exists:**
+   ```powershell
+   winget search "Package Name"
+   ```
+
+2. **Update winget sources:**
+   ```powershell
+   winget source update
+   ```
+
+3. **Try manual installation:**
+   See [MANUAL_INSTALL.md](MANUAL_INSTALL.md)
+
+---
+
+## 📁 Structure
+
+```
+dotfiles-win/
+├── bootstrap.ps1           # Remote installation script
+├── install.ps1             # Main installation script
+├── winget/
+│   └── packages.txt        # List of packages to install
+├── MANUAL_INSTALL.md       # Manual installation guide
+└── README.md               # This file
+```
+
+---
+
+## 🔄 Maintenance
+
+### Update all installed packages
+
+```powershell
+winget upgrade --all
+```
+
+### List installed packages
+
+```powershell
+winget list --source winget
+```
+
+### Uninstall packages
+
+```powershell
+winget uninstall --id PackageId
+```
+
+---
+
+## 📚 References
+
+- [winget documentation](https://docs.microsoft.com/en-us/windows/package-manager/winget/)
+- [winget package repository](https://github.com/microsoft/winget-pkgs)
+- [PowerShell documentation](https://docs.microsoft.com/en-us/powershell/)
+
+---
+
+## 📝 License
+
+MIT License - See [LICENSE](LICENSE) file for details
+
+---
+
+**Last updated:** 2025-10-21
