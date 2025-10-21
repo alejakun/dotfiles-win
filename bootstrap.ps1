@@ -144,13 +144,20 @@ try {
     # Execute install.ps1
     $installScript = Join-Path $InstallDir "install.ps1"
 
-    if ($DryRun) {
-        & $installScript -DryRun
-    } else {
-        & $installScript
-    }
+    # Change to install directory so $PSScriptRoot works correctly
+    Push-Location $InstallDir
 
-    $exitCode = $LASTEXITCODE
+    try {
+        if ($DryRun) {
+            & powershell.exe -ExecutionPolicy Bypass -File $installScript -DryRun
+        } else {
+            & powershell.exe -ExecutionPolicy Bypass -File $installScript
+        }
+
+        $exitCode = $LASTEXITCODE
+    } finally {
+        Pop-Location
+    }
 
     Write-Host ""
 
