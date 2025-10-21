@@ -9,6 +9,7 @@
 Git.Git
 Microsoft.VisualStudioCode
 Anthropic.ClaudeCode
+Python.Python.3.12
 
 # Browsers
 Google.Chrome
