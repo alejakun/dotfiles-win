@@ -52,9 +52,13 @@ Write-Success "winget found: $(winget --version)"
 Write-Host ""
 
 # Read package list
-$packageFile = Join-Path $PSScriptRoot "winget\packages.txt"
+# Use script directory if available, otherwise use current directory
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+$packageFile = Join-Path $scriptDir "winget\packages.txt"
 if (-not (Test-Path $packageFile)) {
     Write-Error "Package file not found: $packageFile"
+    Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
+    Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
     exit 1
 }
 
