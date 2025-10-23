@@ -6,37 +6,36 @@
 
 ## 🚀 Quick Start
 
-### One-Line Installation (Home Profile - Default)
+### One-Line Installation
 
-Open **PowerShell** and run:
+Open **PowerShell** and run one of these commands:
 
+**HOME only** (family computers - essential apps):
 ```powershell
 iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 ```
 
-This installs essential applications for family computers.
-
-### Install Specific Profiles
-
-**Personal productivity tools:**
+**HOME + PERSONAL** (your personal laptop):
 ```powershell
-iex "& {$(iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1)} -Profile personal"
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-personal.ps1 | iex
 ```
 
-**Development tools:**
+**HOME + DEV** (development workstation):
 ```powershell
-iex "& {$(iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1)} -Profile dev"
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-dev.ps1 | iex
 ```
 
-**Infrastructure/virtualization:**
+**HOME + INFRA** (infrastructure workstation):
 ```powershell
-iex "& {$(iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1)} -Profile infra"
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-infra.ps1 | iex
 ```
 
-**Everything:**
+**FULL** (everything - home + personal + dev + infra):
 ```powershell
-iex "& {$(iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1)} -Profile full"
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-full.ps1 | iex
 ```
+
+> **Note:** All profiles except HOME automatically install the HOME profile first.
 
 ---
 
