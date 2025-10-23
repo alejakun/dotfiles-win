@@ -2,8 +2,12 @@
 # ================================================================================
 # dotfiles-win Bootstrap Installer
 # ================================================================================
-# One-line installation:
+# One-line installation (home profile - default):
 #   iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+#
+# Install specific profile:
+#   iex "& {$(iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1)} -Profile personal"
+#   iex "& {$(iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1)} -Profile dev"
 #
 # What this does:
 #   1. Checks prerequisites (winget)
@@ -17,7 +21,9 @@
 
 param(
     [switch]$DryRun,
-    [string]$Branch = "master"
+    [string]$Branch = "master",
+    [ValidateSet("home", "personal", "dev", "infra", "full")]
+    [string]$Profile = "home"
 )
 
 # Configuration
@@ -153,9 +159,9 @@ try {
 
         # Execute the script directly
         if ($DryRun) {
-            & $installScript -DryRun
+            & $installScript -DryRun -Profile $Profile
         } else {
-            & $installScript
+            & $installScript -Profile $Profile
         }
 
         $exitCode = $LASTEXITCODE

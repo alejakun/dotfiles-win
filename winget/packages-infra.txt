@@ -1,0 +1,19 @@
+# ================================================================================
+# Windows Package Installation List - Infrastructure Profile
+# ================================================================================
+# Install via: winget install --id <PackageId>
+#
+# This profile includes infrastructure/virtualization tools for occasional use
+# Resource-intensive applications - install only when needed
+
+# Database Tools
+dbeaver.dbeaver
+
+# Containers & Virtualization
+Docker.DockerDesktop
+VMware.WorkstationPro
+Hashicorp.Vagrant
+
+# Note: Ansible not available via winget
+# Install via WSL or pip: pip install ansible
+# See MANUAL_INSTALL.md for details

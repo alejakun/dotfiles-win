@@ -14,8 +14,8 @@ param(
     [switch]$DryRun,
     [switch]$ShowCommands,
     [switch]$Help,
-    [ValidateSet("basic", "dev", "full")]
-    [string]$Profile = "full"
+    [ValidateSet("home", "personal", "dev", "infra", "full")]
+    [string]$Profile = "home"
 )
 
 # Colors for output
@@ -47,32 +47,41 @@ if ($Help) {
     Write-Host "=====================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "USAGE:" -ForegroundColor Yellow
-    Write-Host "  .\install.ps1                      Install all packages (full profile)"
-    Write-Host "  .\install.ps1 -Profile basic       Install basic profile only"
-    Write-Host "  .\install.ps1 -Profile dev         Install dev tools only"
-    Write-Host "  .\install.ps1 -Profile full        Install everything (default)"
+    Write-Host "  .\install.ps1                      Install home profile (default)"
+    Write-Host "  .\install.ps1 -Profile home        Family/essential apps"
+    Write-Host "  .\install.ps1 -Profile personal    Personal productivity tools"
+    Write-Host "  .\install.ps1 -Profile dev         Development tools"
+    Write-Host "  .\install.ps1 -Profile infra       Infrastructure/virtualization"
+    Write-Host "  .\install.ps1 -Profile full        Everything combined"
     Write-Host "  .\install.ps1 -DryRun              Preview packages without installing"
     Write-Host "  .\install.ps1 -ShowCommands        Display individual winget commands"
     Write-Host "  .\install.ps1 -Help                Show this help message"
     Write-Host ""
     Write-Host "PROFILES:" -ForegroundColor Yellow
-    Write-Host "  basic - Essential apps + Git/GitHub CLI/VSCode (non-developers)"
-    Write-Host "  dev   - Development tools only (Claude Code, Python)"
-    Write-Host "  full  - Everything (basic + dev)"
+    Write-Host "  home     - Essential apps for family computers (DEFAULT)"
+    Write-Host "             Git, VSCode, browsers, Dropbox, Zoom, etc."
+    Write-Host "  personal - Personal productivity (Windows Terminal, Teams, VLC, etc.)"
+    Write-Host "  dev      - Development tools (Claude, Python, Cloud CLIs, editors)"
+    Write-Host "  infra    - Infrastructure (Docker, VMware, Vagrant, DBeaver)"
+    Write-Host "  full     - All profiles combined"
     Write-Host ""
     Write-Host "EXAMPLES:" -ForegroundColor Yellow
-    Write-Host "  # Install basic profile for non-developer"
-    Write-Host "  .\install.ps1 -Profile basic"
+    Write-Host "  # Family computer (default)"
+    Write-Host "  .\install.ps1"
     Write-Host ""
-    Write-Host "  # Install basic + dev tools separately"
-    Write-Host "  .\install.ps1 -Profile basic"
+    Write-Host "  # Your personal workstation"
+    Write-Host "  .\install.ps1 -Profile home"
+    Write-Host "  .\install.ps1 -Profile personal"
     Write-Host "  .\install.ps1 -Profile dev"
     Write-Host ""
-    Write-Host "  # Preview what would be installed (full profile)"
-    Write-Host "  .\install.ps1 -DryRun"
+    Write-Host "  # Everything at once"
+    Write-Host "  .\install.ps1 -Profile full"
+    Write-Host ""
+    Write-Host "  # Preview what would be installed"
+    Write-Host "  .\install.ps1 -Profile personal -DryRun"
     Write-Host ""
     Write-Host "  # See individual commands to copy/paste"
-    Write-Host "  .\install.ps1 -ShowCommands -Profile basic"
+    Write-Host "  .\install.ps1 -ShowCommands -Profile dev"
     Write-Host ""
     exit 0
 }
@@ -106,7 +115,7 @@ if (-not (Test-Path $packageFile)) {
     Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
     Write-Host "Profile: $Profile" -ForegroundColor Gray
     Write-Host ""
-    Write-Host "Available profiles: basic, dev, full" -ForegroundColor Yellow
+    Write-Host "Available profiles: home, personal, dev, infra, full" -ForegroundColor Yellow
     exit 1
 }
 

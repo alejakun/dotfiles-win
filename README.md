@@ -1,12 +1,12 @@
 # dotfiles-win
 
-> Automated Windows application installation using winget
+> Automated Windows application installation using winget with multiple profiles
 
 ---
 
 ## 🚀 Quick Start
 
-### One-Line Installation
+### One-Line Installation (Home Profile - Default)
 
 Open **PowerShell** and run:
 
@@ -14,57 +14,134 @@ Open **PowerShell** and run:
 iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 ```
 
-This will automatically:
-- Check prerequisites (winget)
-- Download installation files
-- Install all applications listed in `winget/packages.txt`
+This installs essential applications for family computers.
 
----
+### Install Specific Profiles
 
-### Preview Mode (Dry Run)
-
-To see what would be installed without actually installing:
-
+**Personal productivity tools:**
 ```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex -DryRun
+iex "& {$(iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1)} -Profile personal"
+```
+
+**Development tools:**
+```powershell
+iex "& {$(iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1)} -Profile dev"
+```
+
+**Infrastructure/virtualization:**
+```powershell
+iex "& {$(iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1)} -Profile infra"
+```
+
+**Everything:**
+```powershell
+iex "& {$(iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1)} -Profile full"
 ```
 
 ---
 
-## 📦 Included Applications
+## 📋 Profiles
 
-### Development Tools
-- **Git** - Version control
-- **GitHub CLI** - GitHub command line tool
-- **Visual Studio Code** - Code editor
-- **Claude Code** - AI-powered coding assistant CLI
-- **Python 3.12** - Python programming language
+### 🏠 HOME (Default)
+**Purpose:** Essential applications for family computers
 
-### Browsers
-- **Google Chrome** - Web browser
-- **Mozilla Firefox** - Web browser
+**Includes:**
+- Git, GitHub CLI, VSCode
+- Browsers (Chrome, Firefox)
+- 7-Zip, Dropbox
+- Bitwarden (password manager)
+- Rambox, Zoom
+- Doxie Scanner
+- TeamViewer, AnyDesk
+- Adobe Acrobat Reader
+- Google Earth Pro
 
-### Productivity
-- **7-Zip** - File compression
+### 💼 PERSONAL
+**Purpose:** Personal productivity tools
 
-### Security
-- **Bitwarden** - Password manager
+**Includes:**
+- Windows Terminal
+- PowerToys
+- Microsoft Teams
+- Krisp.ai (noise cancellation)
+- ShareX (screenshots)
+- VLC Media Player
+- Google Drive Desktop
 
-### Design & CAD
-- **AutoCAD** - CAD software
+### 👨‍💻 DEV
+**Purpose:** Development tools for frequent use
 
-### Remote Access
-- **TeamViewer** - Remote desktop
-- **AnyDesk** - Remote desktop
+**Includes:**
+- Claude Code (AI assistant)
+- Python 3.12
+- Sublime Text 4
+- Notepad++
+- Google Cloud SDK (gcloud, bq, gsutil)
+- AWS CLI
 
-### Viewers
-- **Adobe Acrobat Reader** - PDF viewer
+### 🏗️ INFRA
+**Purpose:** Infrastructure & virtualization (resource-intensive)
 
-### Geographic Tools
-- **Google Earth Pro** - 3D globe viewer
+**Includes:**
+- DBeaver (database tool)
+- Docker Desktop
+- VMware Workstation Pro
+- Vagrant
 
-### Office Suite
-- **Microsoft Office** - ⚠️ Commented out, requires manual installation
+**Note:** Ansible not available via winget. Install via WSL or pip.
+
+### 🌐 FULL
+**Purpose:** Everything combined (home + personal + dev + infra)
+
+---
+
+## 📦 Installation Methods
+
+### Method 1: One-Liner (Recommended)
+
+See [Quick Start](#-quick-start) above.
+
+### Method 2: Manual Clone
+
+```powershell
+git clone https://github.com/alejakun/dotfiles-win.git
+cd dotfiles-win
+.\install.ps1 -Profile home
+```
+
+### Method 3: Individual Profiles
+
+For your personal workstation:
+
+```powershell
+.\install.ps1 -Profile home
+.\install.ps1 -Profile personal
+.\install.ps1 -Profile dev
+```
+
+---
+
+## 🛠️ Advanced Usage
+
+### Preview Mode (Dry Run)
+
+```powershell
+.\install.ps1 -Profile personal -DryRun
+```
+
+### Show Individual Commands
+
+```powershell
+.\install.ps1 -Profile dev -ShowCommands
+```
+
+This displays individual `winget install` commands you can copy/paste.
+
+### Help
+
+```powershell
+.\install.ps1 -Help
+```
 
 ---
 
@@ -84,53 +161,6 @@ If not installed, get it from [Microsoft Store](https://www.microsoft.com/p/app-
 
 ---
 
-## 🛠️ Manual Installation
-
-If you prefer to clone the repository and run locally:
-
-### 1. Clone the repository
-
-```powershell
-git clone https://github.com/alejakun/dotfiles-win.git
-cd dotfiles-win
-```
-
-### 2. Run the installer
-
-```powershell
-.\install.ps1
-```
-
-### 3. Dry run mode
-
-```powershell
-.\install.ps1 -DryRun
-```
-
-### 4. Show individual commands
-
-Get individual winget commands to copy/paste for selective installation:
-
-```powershell
-.\install.ps1 -ShowCommands
-```
-
-This displays commands like:
-```powershell
-winget install --id Git.Git -e --source winget
-winget install --id Anthropic.ClaudeCode -e --source winget
-```
-
-Useful when you only want to install 1-2 specific packages.
-
-### 5. Show help
-
-```powershell
-.\install.ps1 -Help
-```
-
----
-
 ## ✏️ Customization
 
 ### Adding Applications
@@ -140,7 +170,7 @@ Useful when you only want to install 1-2 specific packages.
    winget search "App Name"
    ```
 
-2. Add to `winget/packages.txt`:
+2. Add to appropriate profile file (`winget/packages-home.txt`, `packages-personal.txt`, etc.):
    ```txt
    # My additions
    Notepad++.Notepad++
@@ -151,7 +181,7 @@ Useful when you only want to install 1-2 specific packages.
 
 ### Removing Applications
 
-Comment out or delete lines in `winget/packages.txt`:
+Comment out or delete lines in package files:
 
 ```txt
 # Mozilla.Firefox  # Don't install Firefox
@@ -225,6 +255,8 @@ After installing Claude Code via winget:
 ```powershell
 # Restart terminal/VSCode, then:
 claude --version
+gcloud --version
+aws --version
 ```
 
 ---
@@ -233,12 +265,16 @@ claude --version
 
 ```
 dotfiles-win/
-├── bootstrap.ps1           # Remote installation script
-├── install.ps1             # Main installation script
+├── bootstrap.ps1                 # Remote installation script
+├── install.ps1                   # Main installation script
 ├── winget/
-│   └── packages.txt        # List of packages to install
-├── MANUAL_INSTALL.md       # Manual installation guide
-└── README.md               # This file
+│   ├── packages-home.txt         # Home profile (default)
+│   ├── packages-personal.txt     # Personal productivity
+│   ├── packages-dev.txt          # Development tools
+│   ├── packages-infra.txt        # Infrastructure/virtualization
+│   └── packages-full.txt         # All profiles combined
+├── MANUAL_INSTALL.md             # Manual installation guide
+└── README.md                     # This file
 ```
 
 ---

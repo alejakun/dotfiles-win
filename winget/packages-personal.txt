@@ -1,0 +1,22 @@
+# ================================================================================
+# Windows Package Installation List - Personal Profile
+# ================================================================================
+# Install via: winget install --id <PackageId>
+#
+# This profile includes personal productivity tools
+# Use in addition to home profile for your personal workstation
+
+# Windows Productivity
+Microsoft.WindowsTerminal
+Microsoft.PowerToys
+
+# Communication & Collaboration
+Microsoft.Teams
+Krisp.Krisp
+
+# Utilities
+ShareX.ShareX
+VideoLAN.VLC
+
+# Cloud Storage
+Google.GoogleDrive
