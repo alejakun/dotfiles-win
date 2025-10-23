@@ -1,8 +1,9 @@
 # ================================================================================
-# Windows Package Installation List
+# Windows Package Installation List - Full Profile
 # ================================================================================
 # Install via: winget install --id <PackageId>
 #
+# This profile includes ALL applications (basic + development)
 # Note: Some packages may require manual installation (see MANUAL_INSTALL.md)
 
 # Development Tools
@@ -11,6 +12,10 @@ GitHub.cli
 Microsoft.VisualStudioCode
 Anthropic.ClaudeCode
 Python.Python.3.12
+
+# Cloud CLI Tools
+Google.CloudSDK
+Amazon.AWSCLI
 
 # Browsers
 Google.Chrome

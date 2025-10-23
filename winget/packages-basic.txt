@@ -1,0 +1,41 @@
+# ================================================================================
+# Windows Package Installation List - Basic Profile
+# ================================================================================
+# Install via: winget install --id <PackageId>
+#
+# This profile includes essential applications for general users
+# Includes Git/GitHub CLI for repository management and updates
+
+# Essential Development Tools
+Git.Git
+GitHub.cli
+Microsoft.VisualStudioCode
+
+# Browsers
+Google.Chrome
+Mozilla.Firefox
+
+# Productivity
+7zip.7zip
+
+# Security
+Bitwarden.Bitwarden
+
+# Communication
+Rambox.Rambox
+
+# Utilities
+Doxie.Doxie
+
+# Remote Access
+TeamViewer.TeamViewer
+AnyDesk.AnyDesk
+
+# Viewers
+Adobe.Acrobat.Reader.64-bit
+
+# Geographic Tools
+Google.EarthPro
+
+# Office Suite (may require manual installation - see MANUAL_INSTALL.md)
+# Microsoft.Office
