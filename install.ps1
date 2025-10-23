@@ -13,7 +13,9 @@
 param(
     [switch]$DryRun,
     [switch]$ShowCommands,
-    [switch]$Help
+    [switch]$Help,
+    [ValidateSet("basic", "dev", "full")]
+    [string]$Profile = "full"
 )
 
 # Colors for output
@@ -45,20 +47,32 @@ if ($Help) {
     Write-Host "=====================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "USAGE:" -ForegroundColor Yellow
-    Write-Host "  .\install.ps1                 Install all packages from winget\packages.txt"
-    Write-Host "  .\install.ps1 -DryRun         Preview packages without installing"
-    Write-Host "  .\install.ps1 -ShowCommands   Display individual winget commands"
-    Write-Host "  .\install.ps1 -Help           Show this help message"
+    Write-Host "  .\install.ps1                      Install all packages (full profile)"
+    Write-Host "  .\install.ps1 -Profile basic       Install basic profile only"
+    Write-Host "  .\install.ps1 -Profile dev         Install dev tools only"
+    Write-Host "  .\install.ps1 -Profile full        Install everything (default)"
+    Write-Host "  .\install.ps1 -DryRun              Preview packages without installing"
+    Write-Host "  .\install.ps1 -ShowCommands        Display individual winget commands"
+    Write-Host "  .\install.ps1 -Help                Show this help message"
+    Write-Host ""
+    Write-Host "PROFILES:" -ForegroundColor Yellow
+    Write-Host "  basic - Essential apps + Git/GitHub CLI/VSCode (non-developers)"
+    Write-Host "  dev   - Development tools only (Claude Code, Python)"
+    Write-Host "  full  - Everything (basic + dev)"
     Write-Host ""
     Write-Host "EXAMPLES:" -ForegroundColor Yellow
-    Write-Host "  # Preview what would be installed"
+    Write-Host "  # Install basic profile for non-developer"
+    Write-Host "  .\install.ps1 -Profile basic"
+    Write-Host ""
+    Write-Host "  # Install basic + dev tools separately"
+    Write-Host "  .\install.ps1 -Profile basic"
+    Write-Host "  .\install.ps1 -Profile dev"
+    Write-Host ""
+    Write-Host "  # Preview what would be installed (full profile)"
     Write-Host "  .\install.ps1 -DryRun"
     Write-Host ""
     Write-Host "  # See individual commands to copy/paste"
-    Write-Host "  .\install.ps1 -ShowCommands"
-    Write-Host ""
-    Write-Host "  # Install everything"
-    Write-Host "  .\install.ps1"
+    Write-Host "  .\install.ps1 -ShowCommands -Profile basic"
     Write-Host ""
     exit 0
 }
@@ -81,14 +95,18 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
 Write-Success "winget found: $(winget --version)"
 Write-Host ""
 
-# Read package list
+# Read package list based on profile
 # Use script directory if available, otherwise use current directory
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-$packageFile = Join-Path $scriptDir "winget\packages.txt"
+$packageFile = Join-Path $scriptDir "winget\packages-$Profile.txt"
+
 if (-not (Test-Path $packageFile)) {
     Write-Error "Package file not found: $packageFile"
     Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
     Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
+    Write-Host "Profile: $Profile" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "Available profiles: basic, dev, full" -ForegroundColor Yellow
     exit 1
 }
 

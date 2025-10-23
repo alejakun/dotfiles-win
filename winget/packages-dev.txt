@@ -1,0 +1,15 @@
+# ================================================================================
+# Windows Package Installation List - Development Profile
+# ================================================================================
+# Install via: winget install --id <PackageId>
+#
+# This profile includes ONLY additional development tools
+# Use in combination with basic profile or install full profile instead
+
+# AI & Development Tools
+Anthropic.ClaudeCode
+Python.Python.3.12
+
+# Cloud CLI Tools
+Google.CloudSDK
+Amazon.AWSCLI
