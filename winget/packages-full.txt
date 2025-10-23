@@ -3,32 +3,30 @@
 # ================================================================================
 # Install via: winget install --id <PackageId>
 #
-# This profile includes ALL applications (basic + development)
+# This profile includes ALL applications (home + personal + dev + infra)
 # Note: Some packages may require manual installation (see MANUAL_INSTALL.md)
 
-# Development Tools
+# === HOME PROFILE ===
+
+# Essential Tools
 Git.Git
 GitHub.cli
 Microsoft.VisualStudioCode
-Anthropic.ClaudeCode
-Python.Python.3.12
-
-# Cloud CLI Tools
-Google.CloudSDK
-Amazon.AWSCLI
 
 # Browsers
 Google.Chrome
 Mozilla.Firefox
 
-# Productivity
+# Productivity & Storage
 7zip.7zip
+Dropbox.Dropbox
 
 # Security
 Bitwarden.Bitwarden
 
 # Communication
 Rambox.Rambox
+Zoom.Zoom
 
 # Utilities
 Doxie.Doxie
@@ -42,6 +40,47 @@ Adobe.Acrobat.Reader.64-bit
 
 # Geographic Tools
 Google.EarthPro
+
+# === PERSONAL PROFILE ===
+
+# Windows Productivity
+Microsoft.WindowsTerminal
+Microsoft.PowerToys
+
+# Communication & Collaboration
+Microsoft.Teams
+Krisp.Krisp
+
+# Utilities
+ShareX.ShareX
+VideoLAN.VLC
+
+# Cloud Storage
+Google.GoogleDrive
+
+# === DEV PROFILE ===
+
+# AI & Development Tools
+Anthropic.ClaudeCode
+Python.Python.3.12
+
+# Code Editors
+SublimeHQ.SublimeText.4
+Notepad++.Notepad++
+
+# Cloud CLI Tools
+Google.CloudSDK
+Amazon.AWSCLI
+
+# === INFRA PROFILE ===
+
+# Database Tools
+dbeaver.dbeaver
+
+# Containers & Virtualization
+Docker.DockerDesktop
+VMware.WorkstationPro
+Hashicorp.Vagrant
 
 # Office Suite (may require manual installation - see MANUAL_INSTALL.md)
 # Microsoft.Office

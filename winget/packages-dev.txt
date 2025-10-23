@@ -3,12 +3,16 @@
 # ================================================================================
 # Install via: winget install --id <PackageId>
 #
-# This profile includes ONLY additional development tools
-# Use in combination with basic profile or install full profile instead
+# This profile includes development tools for frequent use
+# Use in addition to home profile for development workstation
 
 # AI & Development Tools
 Anthropic.ClaudeCode
 Python.Python.3.12
+
+# Code Editors
+SublimeHQ.SublimeText.4
+Notepad++.Notepad++
 
 # Cloud CLI Tools
 Google.CloudSDK

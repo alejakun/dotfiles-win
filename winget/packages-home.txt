@@ -1,12 +1,12 @@
 # ================================================================================
-# Windows Package Installation List - Basic Profile
+# Windows Package Installation List - Home Profile (DEFAULT)
 # ================================================================================
 # Install via: winget install --id <PackageId>
 #
-# This profile includes essential applications for general users
-# Includes Git/GitHub CLI for repository management and updates
+# This profile includes essential applications for family computers
+# Includes Git/GitHub CLI/VSCode for repository management and basic editing
 
-# Essential Development Tools
+# Essential Tools
 Git.Git
 GitHub.cli
 Microsoft.VisualStudioCode
@@ -15,14 +15,16 @@ Microsoft.VisualStudioCode
 Google.Chrome
 Mozilla.Firefox
 
-# Productivity
+# Productivity & Storage
 7zip.7zip
+Dropbox.Dropbox
 
 # Security
 Bitwarden.Bitwarden
 
 # Communication
 Rambox.Rambox
+Zoom.Zoom
 
 # Utilities
 Doxie.Doxie
