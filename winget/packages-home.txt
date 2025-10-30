@@ -28,6 +28,8 @@ Zoom.Zoom
 
 # Utilities
 Doxie.Doxie
+LocalSend.LocalSend
+QL-Win.QuickLook
 
 # Remote Access
 TeamViewer.TeamViewer
