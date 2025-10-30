@@ -107,25 +107,55 @@ Write-Host ""
 # Read package list based on profile
 # Use script directory if available, otherwise use current directory
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-$packageFile = Join-Path $scriptDir "winget\packages-$Profile.txt"
 
-if (-not (Test-Path $packageFile)) {
-    Write-Error "Package file not found: $packageFile"
+# Full profile reads all profile files and combines them
+if ($Profile -eq "full") {
+    Write-Step "Reading package lists from all profiles..."
     Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
     Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
-    Write-Host "Profile: $Profile" -ForegroundColor Gray
-    Write-Host ""
-    Write-Host "Available profiles: home, personal, dev, infra, full" -ForegroundColor Yellow
-    exit 1
-}
 
-Write-Step "Reading package list from: $packageFile"
-Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
-Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
-Write-Host "Package file exists: $(Test-Path $packageFile)" -ForegroundColor Gray
+    $profileFiles = @("home", "personal", "dev", "infra")
+    $allPackages = @()
 
-$packages = Get-Content $packageFile | Where-Object {
-    $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
+    foreach ($prof in $profileFiles) {
+        $packageFile = Join-Path $scriptDir "winget\packages-$prof.txt"
+
+        if (Test-Path $packageFile) {
+            Write-Host "  Reading: packages-$prof.txt" -ForegroundColor Gray
+            $profilePackages = Get-Content $packageFile | Where-Object {
+                $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
+            }
+            $allPackages += $profilePackages
+        } else {
+            Write-Warning "  Package file not found: packages-$prof.txt"
+        }
+    }
+
+    # Remove duplicates while preserving order
+    $packages = $allPackages | Select-Object -Unique
+
+} else {
+    # Single profile mode
+    $packageFile = Join-Path $scriptDir "winget\packages-$Profile.txt"
+
+    if (-not (Test-Path $packageFile)) {
+        Write-Error "Package file not found: $packageFile"
+        Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
+        Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
+        Write-Host "Profile: $Profile" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "Available profiles: home, personal, dev, infra, full" -ForegroundColor Yellow
+        exit 1
+    }
+
+    Write-Step "Reading package list from: $packageFile"
+    Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
+    Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
+    Write-Host "Package file exists: $(Test-Path $packageFile)" -ForegroundColor Gray
+
+    $packages = Get-Content $packageFile | Where-Object {
+        $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
+    }
 }
 
 Write-Host "Found $($packages.Count) packages to install" -ForegroundColor White
