@@ -39,6 +39,43 @@ function Write-Error {
     Write-Host "[-] $Message" -ForegroundColor Red
 }
 
+# Helper function to read packages from profile files
+function Get-PackagesFromProfile {
+    param(
+        [string]$PackageType,  # "winget" or "npm"
+        [string]$Profile,
+        [string]$ScriptDir
+    )
+
+    if ($Profile -eq "full") {
+        $profileFiles = @("home", "personal", "dev", "infra")
+        $allPackages = @()
+
+        foreach ($prof in $profileFiles) {
+            $packageFile = Join-Path $ScriptDir "$PackageType\packages-$prof.txt"
+
+            if (Test-Path $packageFile) {
+                $profilePackages = Get-Content $packageFile | Where-Object {
+                    $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
+                }
+                $allPackages += $profilePackages
+            }
+        }
+
+        return $allPackages | Select-Object -Unique
+    } else {
+        $packageFile = Join-Path $ScriptDir "$PackageType\packages-$Profile.txt"
+
+        if (Test-Path $packageFile) {
+            return Get-Content $packageFile | Where-Object {
+                $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
+            }
+        }
+
+        return @()
+    }
+}
+
 # Show help if requested
 if ($Help) {
     Write-Host ""
@@ -108,54 +145,16 @@ Write-Host ""
 # Use script directory if available, otherwise use current directory
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
 
-# Full profile reads all profile files and combines them
-if ($Profile -eq "full") {
-    Write-Step "Reading package lists from all profiles..."
-    Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
-    Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
+Write-Step "Reading winget package list..."
+Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
+Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
 
-    $profileFiles = @("home", "personal", "dev", "infra")
-    $allPackages = @()
+$packages = Get-PackagesFromProfile -PackageType "winget" -Profile $Profile -ScriptDir $scriptDir
 
-    foreach ($prof in $profileFiles) {
-        $packageFile = Join-Path $scriptDir "winget\packages-$prof.txt"
-
-        if (Test-Path $packageFile) {
-            Write-Host "  Reading: packages-$prof.txt" -ForegroundColor Gray
-            $profilePackages = Get-Content $packageFile | Where-Object {
-                $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
-            }
-            $allPackages += $profilePackages
-        } else {
-            Write-Warning "  Package file not found: packages-$prof.txt"
-        }
-    }
-
-    # Remove duplicates while preserving order
-    $packages = $allPackages | Select-Object -Unique
-
-} else {
-    # Single profile mode
-    $packageFile = Join-Path $scriptDir "winget\packages-$Profile.txt"
-
-    if (-not (Test-Path $packageFile)) {
-        Write-Error "Package file not found: $packageFile"
-        Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
-        Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
-        Write-Host "Profile: $Profile" -ForegroundColor Gray
-        Write-Host ""
-        Write-Host "Available profiles: home, personal, dev, infra, full" -ForegroundColor Yellow
-        exit 1
-    }
-
-    Write-Step "Reading package list from: $packageFile"
-    Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
-    Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
-    Write-Host "Package file exists: $(Test-Path $packageFile)" -ForegroundColor Gray
-
-    $packages = Get-Content $packageFile | Where-Object {
-        $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
-    }
+if ($packages.Count -eq 0) {
+    Write-Error "No winget packages found for profile: $Profile"
+    Write-Host "Available profiles: home, personal, dev, infra, full" -ForegroundColor Yellow
+    exit 1
 }
 
 Write-Host "Found $($packages.Count) packages to install" -ForegroundColor White
@@ -259,6 +258,71 @@ if ($failed -gt 0) {
     }
     Write-Host ""
     Write-Host "See MANUAL_INSTALL.md for manual installation instructions" -ForegroundColor Yellow
+}
+
+# NPM Package Installation
+$npmPackages = Get-PackagesFromProfile -PackageType "npm" -Profile $Profile -ScriptDir $scriptDir
+
+if ($npmPackages.Count -gt 0) {
+    Write-Host ""
+    Write-Host "=====================================" -ForegroundColor Cyan
+    Write-Host "NPM Package Installation" -ForegroundColor Cyan
+    Write-Host "=====================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    # Check if npm is available, reload PATH if not
+    if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+        Write-Step "npm not found, reloading PATH..."
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+        # Check again after reloading
+        if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+            Write-Warning "npm still not found! Node.js may need to be installed first."
+            Write-Host "Please restart your terminal and run this script again." -ForegroundColor Yellow
+            Write-Host ""
+        }
+    }
+
+    # Proceed with npm installation if available
+    if (Get-Command npm -ErrorAction SilentlyContinue) {
+        Write-Success "npm found: $(npm --version)"
+        Write-Host "Found $($npmPackages.Count) npm packages to install" -ForegroundColor White
+        Write-Host ""
+
+        if (-not $DryRun) {
+            $npmInstalled = 0
+            $npmFailed = 0
+
+            foreach ($package in $npmPackages) {
+                Write-Host "[>] Processing: $package" -ForegroundColor Yellow
+
+                try {
+                    npm install -g $package --silent 2>&1 | Out-Null
+
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Success "  Installed: $package"
+                        $npmInstalled++
+                    } else {
+                        Write-Warning "  Failed: $package"
+                        $npmFailed++
+                    }
+                } catch {
+                    Write-Warning "  Error: $package"
+                    $npmFailed++
+                }
+
+                Write-Host ""
+            }
+
+            # NPM Summary
+            Write-Host "=====================================" -ForegroundColor Cyan
+            Write-Host "NPM Installation Summary" -ForegroundColor Cyan
+            Write-Host "=====================================" -ForegroundColor Cyan
+            Write-Host "[+] Installed: $npmInstalled" -ForegroundColor Green
+            Write-Host "[-] Failed:    $npmFailed" -ForegroundColor Red
+            Write-Host ""
+        }
+    }
 }
 
 Write-Host "Installation complete!" -ForegroundColor Cyan

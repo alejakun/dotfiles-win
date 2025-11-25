@@ -18,3 +18,7 @@ $RECYCLE.BIN/
 # macOS (for development on Mac)
 .DS_Store
 ._*
+
+# AI
+CLAUDE.md
+DIRECTIVES.md

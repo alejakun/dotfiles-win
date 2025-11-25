@@ -66,6 +66,7 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 - ShareX (screenshots)
 - VLC Media Player
 - Google Drive Desktop
+- Tailscale (VPN mesh network)
 
 ### 👨‍💻 DEV
 **Purpose:** Development tools for frequent use

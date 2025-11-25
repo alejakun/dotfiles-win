@@ -20,3 +20,6 @@ VideoLAN.VLC
 
 # Cloud Storage
 Google.GoogleDrive
+
+# Network & VPN
+Tailscale.Tailscale
