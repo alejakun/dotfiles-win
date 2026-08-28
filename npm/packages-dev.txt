@@ -1,0 +1,12 @@
+# ================================================================================
+# Global NPM Package List - Development Profile
+# ================================================================================
+# Install via: npm install -g <package>
+#
+# Requires Node.js (installed by this profile via winget: OpenJS.NodeJS)
+# One package per line. Lines starting with # are ignored.
+#
+# Examples:
+# typescript
+# eslint
+# pnpm

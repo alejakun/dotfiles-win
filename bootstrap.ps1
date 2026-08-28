@@ -34,6 +34,7 @@ if ($Profile -notin $ValidProfiles) {
 # Configuration
 $RepoOwner = "alejakun"
 $RepoName = "dotfiles-win"
+$Branch = if ($env:DOTFILES_BRANCH) { $env:DOTFILES_BRANCH } else { "master" }
 $BaseUrl = "https://raw.githubusercontent.com/$RepoOwner/$RepoName/$Branch"
 $InstallDir = Join-Path $env:TEMP "dotfiles-win-install"
 
@@ -101,18 +102,37 @@ Write-Host ""
 # Download installation files
 Write-Step "Downloading installation files from GitHub..."
 
+# The "full" profile needs every package list; the others need only their own
+$profilesToFetch = if ($Profile -eq "full") { @("home", "personal", "dev", "infra") } else { @($Profile) }
+
+# Recreate the repository layout install.ps1 expects
+New-Item -ItemType Directory -Path (Join-Path $InstallDir "winget") -Force | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $InstallDir "npm") -Force | Out-Null
+
 $files = @(
     @{
         Url = "$BaseUrl/install.ps1"
         Path = Join-Path $InstallDir "install.ps1"
         Name = "install.ps1"
-    },
-    @{
-        Url = "$BaseUrl/winget/packages.txt"
-        Path = Join-Path $InstallDir "packages.txt"
-        Name = "winget/packages.txt"
+        Required = $true
     }
 )
+
+foreach ($prof in $profilesToFetch) {
+    # winget lists are mandatory, npm lists are optional (not every profile has one)
+    $files += @{
+        Url = "$BaseUrl/winget/packages-$prof.txt"
+        Path = Join-Path $InstallDir "winget\packages-$prof.txt"
+        Name = "winget/packages-$prof.txt"
+        Required = $true
+    }
+    $files += @{
+        Url = "$BaseUrl/npm/packages-$prof.txt"
+        Path = Join-Path $InstallDir "npm\packages-$prof.txt"
+        Name = "npm/packages-$prof.txt"
+        Required = $false
+    }
+}
 
 $downloadSuccess = $true
 foreach ($file in $files) {
@@ -123,10 +143,15 @@ foreach ($file in $files) {
         Invoke-WebRequest -Uri $file.Url -OutFile $file.Path -UseBasicParsing
         Write-Success "    Downloaded: $($file.Name)"
     } catch {
-        Write-Error "    Failed to download: $($file.Name)"
-        Write-Host "    URL: $($file.Url)" -ForegroundColor Gray
-        Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Gray
-        $downloadSuccess = $false
+        if ($file.Required) {
+            Write-Error "    Failed to download: $($file.Name)"
+            Write-Host "    URL: $($file.Url)" -ForegroundColor Gray
+            Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Gray
+            $downloadSuccess = $false
+        } else {
+            Write-Host "    Skipped (not defined for this profile): $($file.Name)" -ForegroundColor DarkGray
+            if (Test-Path $file.Path) { Remove-Item -Path $file.Path -Force }
+        }
     }
 }
 
@@ -143,15 +168,6 @@ Write-Step "Starting installation..."
 Write-Host ""
 
 try {
-    # Create winget directory for packages.txt
-    $wingetDir = Join-Path $InstallDir "winget"
-    New-Item -ItemType Directory -Path $wingetDir -Force | Out-Null
-
-    # Move packages.txt to winget directory
-    $packagesSource = Join-Path $InstallDir "packages.txt"
-    $packagesDest = Join-Path $wingetDir "packages.txt"
-    Move-Item -Path $packagesSource -Destination $packagesDest -Force
-
     # Execute install.ps1 in the correct directory
     $installScript = Join-Path $InstallDir "install.ps1"
 
