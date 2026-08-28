@@ -186,8 +186,13 @@ function Invoke-DotfilesBootstrap {
 
     $downloadSuccess = $true
     foreach ($file in $files) {
-        Write-Host "  Downloading: $($file.Name)..." -ForegroundColor Yellow
-        Write-Host "    URL: $($file.Url)" -ForegroundColor Gray
+        # Optional lists are announced only if they turn up. Most layers have no
+        # npm list and never will - npm arrives with Node.js, which lives in pro -
+        # so a miss is the normal case, not news.
+        if ($file.Required) {
+            Write-Host "  Downloading: $($file.Name)..." -ForegroundColor Yellow
+            Write-Host "    URL: $($file.Url)" -ForegroundColor Gray
+        }
 
         try {
             Invoke-WebRequest -Uri $file.Url -OutFile $file.Path -UseBasicParsing
@@ -199,7 +204,6 @@ function Invoke-DotfilesBootstrap {
                 Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Gray
                 $downloadSuccess = $false
             } else {
-                Write-Host "    Skipped (no such list in the repo): $($file.Name)" -ForegroundColor DarkGray
                 if (Test-Path $file.Path) { Remove-Item -Path $file.Path -Force }
             }
         }
