@@ -326,6 +326,14 @@ $installed = 0
 $failed = 0
 $skipped = 0
 $failedPackages = @()
+$userScopedPackages = @()
+
+# Several packages ship both a machine-wide and a per-user installer, and winget
+# picks. If it picks per-user, the package lands only in the profile running this
+# script - on a machine being handed to someone else, they simply never get it,
+# with nothing in the summary to say so. Ask for machine scope explicitly.
+# Unelevated there is no point: machine scope would fail every time.
+$preferMachineScope = Test-Administrator
 
 foreach ($package in $packages) {
     Write-Host "[>] Processing: $package" -ForegroundColor Yellow
@@ -337,11 +345,34 @@ foreach ($package in $packages) {
         # Not installed, proceed with installation
         Write-Host "  [*] Installing..." -ForegroundColor Cyan
 
+        $baseArgs = @(
+            "install", "--id", $package, "--exact", "--silent",
+            "--accept-package-agreements", "--accept-source-agreements"
+        )
+
         try {
-            $installResult = winget install --id $package --exact --silent --accept-package-agreements --accept-source-agreements 2>&1
+            $fellBackToUser = $false
+
+            if ($preferMachineScope) {
+                $installResult = & winget @baseArgs --scope machine 2>&1
+
+                if ($LASTEXITCODE -ne 0) {
+                    # Either the package has no machine-wide installer, or something
+                    # else went wrong. Retry unconstrained and let the outcome say which.
+                    $installResult = & winget @baseArgs 2>&1
+                    $fellBackToUser = $LASTEXITCODE -eq 0
+                }
+            } else {
+                $installResult = & winget @baseArgs 2>&1
+            }
 
             if ($LASTEXITCODE -eq 0) {
-                Write-Success "  Installed: $package"
+                if ($fellBackToUser) {
+                    Write-Success "  Installed (current user only): $package"
+                    $userScopedPackages += $package
+                } else {
+                    Write-Success "  Installed: $package"
+                }
                 $installed++
             } else {
                 Write-Warn "  Failed: $package"
@@ -374,6 +405,19 @@ Write-Host "[+] Installed:        $installed" -ForegroundColor Green
 Write-Host "[=] Already installed: $skipped" -ForegroundColor Gray
 Write-Host "[-] Failed:           $failed" -ForegroundColor Red
 Write-Host ""
+
+if ($userScopedPackages.Count -gt 0) {
+    Write-Warn "Installed for the current user only:"
+    $userScopedPackages | ForEach-Object {
+        Write-Host "  - $_" -ForegroundColor Yellow
+    }
+    Write-Host ""
+    Write-Host "These ship no machine-wide installer, so they live in this account's" -ForegroundColor Gray
+    Write-Host "profile and other users on this machine will not see them. To give" -ForegroundColor Gray
+    Write-Host "someone else access, run the install again from their session - no" -ForegroundColor Gray
+    Write-Host "elevation needed, since a per-user install does not require it." -ForegroundColor Gray
+    Write-Host ""
+}
 
 if ($failed -gt 0) {
     Write-Warn "Failed packages:"
