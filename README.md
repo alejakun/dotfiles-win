@@ -149,7 +149,7 @@ Docker on a machine that has no use for Node or the cloud CLIs.
 - **Administrator privileges** - most packages install machine-wide
 
 `-DryRun` and `-ShowCommands` do not install anything, so they run fine without
-elevation.
+elevation — they warn that the real install will need it.
 
 ### Check if winget is installed
 

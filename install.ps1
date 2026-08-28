@@ -143,11 +143,18 @@ Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Check for elevation before anything else. -DryRun and -ShowCommands install
-# nothing, so they do not need it.
-if (-not $SkipAdminCheck -and -not $DryRun -and -not $ShowCommands) {
+# nothing, so they only warn; a real run stops here.
+if (-not $SkipAdminCheck) {
     Write-Step "Checking administrator privileges..."
 
-    if (-not (Test-Administrator)) {
+    if (Test-Administrator) {
+        Write-Success "Running as administrator"
+    } elseif ($DryRun -or $ShowCommands) {
+        Write-Warn "Not running as administrator"
+        Write-Host "  This preview works, but the real install will not: packages like" -ForegroundColor Gray
+        Write-Host "  Office, Docker and TeamViewer install machine-wide." -ForegroundColor Gray
+        Write-Host "  Re-open with Win+X -> Terminal (Admin) before installing for real." -ForegroundColor Gray
+    } else {
         Write-Err "Administrator privileges required"
         Write-Host ""
         Write-Host "Most packages here - Office, Docker, TeamViewer and others - install" -ForegroundColor Yellow
@@ -166,7 +173,6 @@ if (-not $SkipAdminCheck -and -not $DryRun -and -not $ShowCommands) {
         exit 1
     }
 
-    Write-Success "Running as administrator"
     Write-Host ""
 }
 
