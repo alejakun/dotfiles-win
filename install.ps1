@@ -206,9 +206,10 @@ if ($packages.Count -eq 0 -and $npmPackages.Count -eq 0) {
     exit 1
 }
 
-Write-Host "Found $($packages.Count) winget packages to install" -ForegroundColor White
+# Neutral wording: -DryRun reaches this line too, and installs none of them
+Write-Host "Found $($packages.Count) winget packages" -ForegroundColor White
 if ($npmPackages.Count -gt 0) {
-    Write-Host "Found $($npmPackages.Count) npm packages to install" -ForegroundColor White
+    Write-Host "Found $($npmPackages.Count) npm packages" -ForegroundColor White
 }
 Write-Host ""
 
