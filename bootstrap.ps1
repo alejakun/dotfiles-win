@@ -259,7 +259,11 @@ function Invoke-DotfilesBootstrap {
         Write-Host ""
 
         if ($exitCode -eq 0) {
-            Write-Success "Installation completed successfully!"
+            if ($DryRun) {
+                Write-Success "Preview complete - nothing was installed"
+            } else {
+                Write-Success "Installation completed successfully!"
+            }
         } else {
             Write-Warn "Installation completed with errors (exit code: $exitCode)"
         }
