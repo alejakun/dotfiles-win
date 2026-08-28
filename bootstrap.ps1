@@ -2,17 +2,15 @@
 # ================================================================================
 # dotfiles-win Bootstrap Installer
 # ================================================================================
-# One-line installation (home profile - default):
+# One-line installation (mini profile - default):
 #   iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #
-# Install specific profile:
-#   $env:DOTFILES_PROFILE="personal"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
-#   $env:DOTFILES_PROFILE="dev"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
-#   $env:DOTFILES_PROFILE="infra"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
-#   $env:DOTFILES_PROFILE="full"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
-#
-# Profiles compose - pass a comma-separated list to install several at once:
-#   $env:DOTFILES_PROFILE="home,dev"; iwr -useb ... | iex
+# Install a specific profile. Each one extends the ones below it, so "plus"
+# installs mini + base + plus:
+#   $env:DOTFILES_PROFILE="base"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+#   $env:DOTFILES_PROFILE="plus"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+#   $env:DOTFILES_PROFILE="pro"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+#   $env:DOTFILES_PROFILE="max"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #
 # What this does:
 #   1. Checks prerequisites (winget)
@@ -24,20 +22,13 @@
 #   OR
 #   iwr -useb URL | iex
 
-# Read profile(s) from environment variable or use default. Accepts a
-# comma-separated list, e.g. DOTFILES_PROFILE="home,dev"
-$InstallProfiles = @(($env:DOTFILES_PROFILE -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+# Read the profile from the environment variable or use the smallest one
+$InstallProfile = if ($env:DOTFILES_PROFILE) { $env:DOTFILES_PROFILE.Trim() } else { "mini" }
+$ValidProfiles = @("mini", "base", "plus", "pro", "max")
 
-if ($InstallProfiles.Count -eq 0) {
-    $InstallProfiles = @("home")
-}
-
-$ValidProfiles = @("home", "personal", "dev", "infra", "full")
-$invalidProfiles = @($InstallProfiles | Where-Object { $_ -notin $ValidProfiles })
-
-if ($invalidProfiles.Count -gt 0) {
-    Write-Host "[-] Invalid profile(s): $($invalidProfiles -join ', ')" -ForegroundColor Red
-    Write-Host "Valid profiles: home, personal, dev, infra, full" -ForegroundColor Yellow
+if ($InstallProfile -notin $ValidProfiles) {
+    Write-Host "[-] Invalid profile: $InstallProfile" -ForegroundColor Red
+    Write-Host "Valid profiles: mini, base, plus, pro, max" -ForegroundColor Yellow
     exit 1
 }
 
@@ -112,9 +103,9 @@ Write-Host ""
 # Download installation files
 Write-Step "Downloading installation files from GitHub..."
 
-# install.ps1 owns the rule for what "full" expands to, so just fetch every list
-# - they are a few hundred bytes each and this keeps that rule in one place.
-$allProfiles = @("home", "personal", "dev", "infra")
+# install.ps1 owns the ladder, so just fetch every list - they are a few hundred
+# bytes each and this keeps that rule in one place.
+$allProfiles = @("mini", "base", "plus", "pro", "max")
 
 # Recreate the repository layout install.ps1 expects
 New-Item -ItemType Directory -Path (Join-Path $InstallDir "winget") -Force | Out-Null
@@ -190,7 +181,7 @@ try {
         Set-Location $InstallDir
 
         # Execute the script directly
-        & $installScript -InstallProfile $InstallProfiles
+        & $installScript -InstallProfile $InstallProfile
 
         $exitCode = $LASTEXITCODE
     } finally {

@@ -1,5 +1,5 @@
 # ================================================================================
-# Global NPM Package List - Development Profile
+# Global NPM Package List - Pro Profile
 # ================================================================================
 # Install via: npm install -g <package>
 #

@@ -1,0 +1,22 @@
+# ================================================================================
+# Windows Package Installation List - Base Profile
+# ================================================================================
+# Install via: winget install --id <PackageId>
+#
+# Adds passwords, communication and media on top of mini.
+# Installing this profile also installs mini.
+
+# Security
+Bitwarden.Bitwarden
+
+# Communication
+Rambox.Rambox
+Zoom.Zoom
+
+# Utilities
+Doxie.Doxie
+QL-Win.QuickLook
+ShareX.ShareX
+
+# Media
+VideoLAN.VLC
