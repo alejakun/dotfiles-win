@@ -35,7 +35,9 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-full.ps1 | iex
 ```
 
-> **Note:** All profiles except HOME automatically install the HOME profile first.
+> **Note:** Every one-liner except the HOME one requests `home,<profile>`, so the
+> HOME base is always included. Running `install.ps1` by hand installs exactly the
+> profiles you name — `-Profile dev` is dev only.
 
 ---
 
@@ -51,6 +53,8 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 - Bitwarden (password manager)
 - Rambox, Zoom
 - Doxie Scanner
+- LocalSend (transferencia de archivos en red local)
+- QuickLook (vista previa con barra espaciadora)
 - TeamViewer, AnyDesk
 - Adobe Acrobat Reader
 - Google Earth Pro
@@ -74,6 +78,7 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 **Includes:**
 - Claude Code (AI assistant)
 - Python 3.12
+- Node.js
 - Sublime Text 4
 - Notepad++
 - Google Cloud SDK (gcloud, bq, gsutil)
@@ -109,15 +114,24 @@ cd dotfiles-win
 .\install.ps1 -Profile home
 ```
 
-### Method 3: Individual Profiles
+### Method 3: Composing Profiles
 
-For your personal workstation:
+Profiles compose. Pass a comma-separated list and the packages are merged,
+de-duplicated and installed in a single pass:
 
 ```powershell
-.\install.ps1 -Profile home
-.\install.ps1 -Profile personal
-.\install.ps1 -Profile dev
+.\install.ps1 -Profile home,personal,dev   # your personal workstation
+.\install.ps1 -Profile home,dev            # what bootstrap-dev.ps1 runs
 ```
+
+A single profile means exactly that profile, which is useful when you want the
+dev tooling on a machine without the home apps:
+
+```powershell
+.\install.ps1 -Profile dev                 # dev only, no home
+```
+
+`full` is shorthand for `home,personal,dev,infra`.
 
 ---
 
@@ -266,13 +280,18 @@ aws --version
 ```
 dotfiles-win/
 ├── bootstrap.ps1                 # Remote installation script
+├── bootstrap-personal.ps1        # One-liner: home + personal
+├── bootstrap-dev.ps1             # One-liner: home + dev
+├── bootstrap-infra.ps1           # One-liner: home + infra
+├── bootstrap-full.ps1            # One-liner: everything
 ├── install.ps1                   # Main installation script
 ├── winget/
 │   ├── packages-home.txt         # Home profile (default)
 │   ├── packages-personal.txt     # Personal productivity
 │   ├── packages-dev.txt          # Development tools
-│   ├── packages-infra.txt        # Infrastructure/virtualization
-│   └── packages-full.txt         # All profiles combined
+│   └── packages-infra.txt        # Infrastructure/virtualization
+├── npm/
+│   └── packages-dev.txt          # Global npm packages (dev profile)
 ├── MANUAL_INSTALL.md             # Manual installation guide
 └── README.md                     # This file
 ```
@@ -311,8 +330,8 @@ winget uninstall --id PackageId
 
 ## 📝 License
 
-MIT License - See [LICENSE](LICENSE) file for details
+Personal project - no license specified.
 
 ---
 
-**Last updated:** 2025-10-21
+**Last updated:** 2026-08-28
