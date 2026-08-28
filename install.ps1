@@ -243,15 +243,21 @@ if ($DryRun) {
     $present = 0
     $missing = 0
 
+    $index = 0
+
     foreach ($package in $packages) {
-        # Same check the installer uses, so the preview matches what will happen
-        winget list --id $package --exact 2>&1 | Out-Null
+        $index++
+
+        # --accept-source-agreements matters: without it winget can stop to ask,
+        # and with the output redirected the prompt is invisible - the script just
+        # appears to hang. Same check the installer uses, so the preview matches.
+        winget list --id $package --exact --accept-source-agreements 2>&1 | Out-Null
 
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "  [=] $package" -ForegroundColor Gray
+            Write-Host ("  [{0,2}/{1}] [=] {2}" -f $index, $packages.Count, $package) -ForegroundColor Gray
             $present++
         } else {
-            Write-Host "  [+] $package" -ForegroundColor Green
+            Write-Host ("  [{0,2}/{1}] [+] {2}" -f $index, $packages.Count, $package) -ForegroundColor Green
             $missing++
         }
     }
@@ -296,7 +302,7 @@ foreach ($package in $packages) {
     Write-Host "[>] Processing: $package" -ForegroundColor Yellow
 
     # Check if already installed (fast check)
-    $checkResult = winget list --id $package --exact 2>&1
+    $checkResult = winget list --id $package --exact --accept-source-agreements 2>&1
     $isInstalled = $LASTEXITCODE -eq 0
 
     if ($isInstalled) {
