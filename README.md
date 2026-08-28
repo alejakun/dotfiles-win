@@ -43,6 +43,39 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-max.ps1 | iex
 ```
 
+### Other one-liners
+
+Swap the profile name in these for whichever level you want.
+
+**Preview first — lists what is already installed and what would be added.**
+Needs neither git nor elevation:
+```powershell
+$env:DOTFILES_PROFILE="plus"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+```
+
+**Second pass on another account.** After an administrator has set the machine up,
+this picks up the packages that only install per-user. No elevation needed, and
+anything already installed machine-wide is detected and skipped:
+```powershell
+$env:DOTFILES_PROFILE="base"; $env:DOTFILES_SKIP_ADMIN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+```
+
+**Any profile without its own URL**, if you would rather use one address:
+```powershell
+$env:DOTFILES_PROFILE="pro"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+```
+
+**Test a branch before merging it:**
+```powershell
+$env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+```
+
+> `DOTFILES_DRYRUN` and `DOTFILES_SKIP_ADMIN` are consumed when read, so they
+> cannot silently turn a later command in the same window into a preview or an
+> unelevated run. `DOTFILES_PROFILE` and `DOTFILES_BRANCH` persist for the
+> session, so a retry after a network failure does not need them typed again —
+> set them to something else, or open a new window, to change them.
+
 ---
 
 ## 📋 Profiles
