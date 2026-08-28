@@ -177,6 +177,27 @@ Docker on a machine that has no use for Node or the cloud CLIs.
 
 ---
 
+## 👥 Setting up a machine for someone else
+
+Run the install from the **administrator account**, elevated. Most packages
+install machine-wide, so they are available to every account on the box
+regardless of who installed them — `install.ps1` asks winget for machine scope
+explicitly rather than letting it choose, since a per-user install would land
+only in the installing account's profile and the other user would silently never
+see it.
+
+A few packages ship no machine-wide installer at all. Those are listed at the end
+of the run under **"Installed for the current user only"**. To give the other
+person those, log into their account and run the same install again — no
+elevation needed, because a per-user install does not require it.
+
+Do **not** run it from the standard account by elevating with the admin's
+password: Windows then runs the process as the administrator, so per-user
+installs still land in the wrong profile, and you have typed your password into
+someone else's session for nothing.
+
+---
+
 ## 📋 Prerequisites
 
 - **Windows 10** (version 1809+) or **Windows 11**
