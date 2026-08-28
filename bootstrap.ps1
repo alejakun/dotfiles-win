@@ -159,61 +159,73 @@ function Invoke-DotfilesBootstrap {
     New-Item -ItemType Directory -Path (Join-Path $InstallDir "winget") -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $InstallDir "npm") -Force | Out-Null
 
+    # No file is flagged as mandatory here. Whether a list exists is a property of
+    # the repository, not something this script should carry a second copy of, so
+    # it asks for every one and lets the answer decide.
     $files = @(
         @{
             Url = "$BaseUrl/install.ps1"
             Path = Join-Path $InstallDir "install.ps1"
             Name = "install.ps1"
-            Required = $true
         }
     )
 
     foreach ($prof in $allProfiles) {
-        # winget lists are mandatory, npm lists are optional (not every profile has one)
         $files += @{
             Url = "$BaseUrl/winget/packages-$prof.txt"
             Path = Join-Path $InstallDir "winget\packages-$prof.txt"
             Name = "winget/packages-$prof.txt"
-            Required = $true
         }
         $files += @{
             Url = "$BaseUrl/npm/packages-$prof.txt"
             Path = Join-Path $InstallDir "npm\packages-$prof.txt"
             Name = "npm/packages-$prof.txt"
-            Required = $false
         }
     }
 
     $downloadSuccess = $true
-    foreach ($file in $files) {
-        # Optional lists are announced only if they turn up. Most layers have no
-        # npm list and never will - npm arrives with Node.js, which lives in pro -
-        # so a miss is the normal case, not news.
-        if ($file.Required) {
-            Write-Host "  Downloading: $($file.Name)..." -ForegroundColor Yellow
-            Write-Host "    URL: $($file.Url)" -ForegroundColor Gray
-        }
+    $found = 0
 
+    foreach ($file in $files) {
         try {
             Invoke-WebRequest -Uri $file.Url -OutFile $file.Path -UseBasicParsing
-            Write-Success "    Downloaded: $($file.Name)"
+            Write-Success "  $($file.Name)"
+            $found++
         } catch {
-            if ($file.Required) {
-                Write-Err "    Failed to download: $($file.Name)"
-                Write-Host "    URL: $($file.Url)" -ForegroundColor Gray
-                Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Gray
+            $status = $null
+            if ($_.Exception.Response) {
+                $status = [int]$_.Exception.Response.StatusCode
+            }
+
+            # A partial download leaves a file behind; do not let it look real
+            if (Test-Path $file.Path) {
+                Remove-Item -Path $file.Path -Force
+            }
+
+            # 404 means the repository simply has no such file - nothing to say.
+            # Anything else means we could not fetch it, which is worth stopping for.
+            if ($status -ne 404) {
+                Write-Err "  Failed to download: $($file.Name)"
+                Write-Host "    $($_.Exception.Message)" -ForegroundColor Gray
                 $downloadSuccess = $false
-            } else {
-                if (Test-Path $file.Path) { Remove-Item -Path $file.Path -Force }
             }
         }
     }
+
+    Write-Host ""
+    Write-Host "  $found files downloaded" -ForegroundColor Gray
 
     Write-Host ""
 
     if (-not $downloadSuccess) {
         Write-Err "Some files failed to download"
         Write-Host "Please check your internet connection and try again" -ForegroundColor Yellow
+        return
+    }
+
+    if (-not (Test-Path (Join-Path $InstallDir "install.ps1"))) {
+        Write-Err "install.ps1 was not found in the repository"
+        Write-Host "Branch: $Branch" -ForegroundColor Gray
         return
     }
 
