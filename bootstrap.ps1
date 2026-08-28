@@ -11,6 +11,9 @@
 #   $env:DOTFILES_PROFILE="infra"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #   $env:DOTFILES_PROFILE="full"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #
+# Profiles compose - pass a comma-separated list to install several at once:
+#   $env:DOTFILES_PROFILE="home,dev"; iwr -useb ... | iex
+#
 # What this does:
 #   1. Checks prerequisites (winget)
 #   2. Downloads installation files from GitHub
@@ -21,12 +24,19 @@
 #   OR
 #   iwr -useb URL | iex
 
-# Read profile from environment variable or use default
-$InstallProfile = if ($env:DOTFILES_PROFILE) { $env:DOTFILES_PROFILE } else { "home" }
-$ValidProfiles = @("home", "personal", "dev", "infra", "full")
+# Read profile(s) from environment variable or use default. Accepts a
+# comma-separated list, e.g. DOTFILES_PROFILE="home,dev"
+$InstallProfiles = @(($env:DOTFILES_PROFILE -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 
-if ($InstallProfile -notin $ValidProfiles) {
-    Write-Host "[-] Invalid profile: $InstallProfile" -ForegroundColor Red
+if ($InstallProfiles.Count -eq 0) {
+    $InstallProfiles = @("home")
+}
+
+$ValidProfiles = @("home", "personal", "dev", "infra", "full")
+$invalidProfiles = @($InstallProfiles | Where-Object { $_ -notin $ValidProfiles })
+
+if ($invalidProfiles.Count -gt 0) {
+    Write-Host "[-] Invalid profile(s): $($invalidProfiles -join ', ')" -ForegroundColor Red
     Write-Host "Valid profiles: home, personal, dev, infra, full" -ForegroundColor Yellow
     exit 1
 }
@@ -102,8 +112,9 @@ Write-Host ""
 # Download installation files
 Write-Step "Downloading installation files from GitHub..."
 
-# The "full" profile needs every package list; the others need only their own
-$profilesToFetch = if ($InstallProfile -eq "full") { @("home", "personal", "dev", "infra") } else { @($InstallProfile) }
+# install.ps1 owns the rule for what "full" expands to, so just fetch every list
+# - they are a few hundred bytes each and this keeps that rule in one place.
+$allProfiles = @("home", "personal", "dev", "infra")
 
 # Recreate the repository layout install.ps1 expects
 New-Item -ItemType Directory -Path (Join-Path $InstallDir "winget") -Force | Out-Null
@@ -118,7 +129,7 @@ $files = @(
     }
 )
 
-foreach ($prof in $profilesToFetch) {
+foreach ($prof in $allProfiles) {
     # winget lists are mandatory, npm lists are optional (not every profile has one)
     $files += @{
         Url = "$BaseUrl/winget/packages-$prof.txt"
@@ -149,7 +160,7 @@ foreach ($file in $files) {
             Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Gray
             $downloadSuccess = $false
         } else {
-            Write-Host "    Skipped (not defined for this profile): $($file.Name)" -ForegroundColor DarkGray
+            Write-Host "    Skipped (no such list in the repo): $($file.Name)" -ForegroundColor DarkGray
             if (Test-Path $file.Path) { Remove-Item -Path $file.Path -Force }
         }
     }
@@ -179,7 +190,7 @@ try {
         Set-Location $InstallDir
 
         # Execute the script directly
-        & $installScript -InstallProfile $InstallProfile
+        & $installScript -InstallProfile $InstallProfiles
 
         $exitCode = $LASTEXITCODE
     } finally {

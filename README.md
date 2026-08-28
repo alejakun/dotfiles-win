@@ -35,7 +35,9 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-full.ps1 | iex
 ```
 
-> **Note:** All profiles except HOME automatically install the HOME profile first.
+> **Note:** Every one-liner except the HOME one requests `home,<profile>`, so the
+> HOME base is always included. Running `install.ps1` by hand installs exactly the
+> profiles you name — `-Profile dev` is dev only.
 
 ---
 
@@ -112,15 +114,24 @@ cd dotfiles-win
 .\install.ps1 -Profile home
 ```
 
-### Method 3: Individual Profiles
+### Method 3: Composing Profiles
 
-For your personal workstation:
+Profiles compose. Pass a comma-separated list and the packages are merged,
+de-duplicated and installed in a single pass:
 
 ```powershell
-.\install.ps1 -Profile home
-.\install.ps1 -Profile personal
-.\install.ps1 -Profile dev
+.\install.ps1 -Profile home,personal,dev   # your personal workstation
+.\install.ps1 -Profile home,dev            # what bootstrap-dev.ps1 runs
 ```
+
+A single profile means exactly that profile, which is useful when you want the
+dev tooling on a machine without the home apps:
+
+```powershell
+.\install.ps1 -Profile dev                 # dev only, no home
+```
+
+`full` is shorthand for `home,personal,dev,infra`.
 
 ---
 

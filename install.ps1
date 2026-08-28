@@ -6,6 +6,7 @@
 #
 # Usage:
 #   .\install.ps1                # Install all packages
+#   .\install.ps1 -Profile home,dev
 #   .\install.ps1 -DryRun        # Show what would be installed
 #   .\install.ps1 -ShowCommands  # Display individual winget commands
 #   .\install.ps1 -Help          # Show help message
@@ -16,7 +17,7 @@ param(
     [switch]$Help,
     [ValidateSet("home", "personal", "dev", "infra", "full")]
     [Alias("Profile")]
-    [string]$InstallProfile = "home"
+    [string[]]$InstallProfile = @("home")
 )
 
 # Colors for output
@@ -40,41 +41,45 @@ function Write-Err {
     Write-Host "[-] $Message" -ForegroundColor Red
 }
 
+# "full" is shorthand for every profile. Everything else is taken literally, so
+# the caller composes what it wants: -Profile home,dev installs exactly those two.
+function Expand-Profiles {
+    param([string[]]$ProfileNames)
+
+    $expanded = @()
+
+    foreach ($prof in $ProfileNames) {
+        if ($prof -eq "full") {
+            $expanded += @("home", "personal", "dev", "infra")
+        } else {
+            $expanded += $prof
+        }
+    }
+
+    return $expanded | Select-Object -Unique
+}
+
 # Helper function to read packages from profile files
 function Get-PackagesFromProfile {
     param(
         [string]$PackageType,  # "winget" or "npm"
-        [string]$ProfileName,
+        [string[]]$ProfileNames,
         [string]$ScriptDir
     )
 
-    if ($ProfileName -eq "full") {
-        $profileFiles = @("home", "personal", "dev", "infra")
-        $allPackages = @()
+    $allPackages = @()
 
-        foreach ($prof in $profileFiles) {
-            $packageFile = Join-Path $ScriptDir "$PackageType\packages-$prof.txt"
-
-            if (Test-Path $packageFile) {
-                $profilePackages = Get-Content $packageFile | Where-Object {
-                    $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
-                }
-                $allPackages += $profilePackages
-            }
-        }
-
-        return $allPackages | Select-Object -Unique
-    } else {
-        $packageFile = Join-Path $ScriptDir "$PackageType\packages-$ProfileName.txt"
+    foreach ($prof in $ProfileNames) {
+        $packageFile = Join-Path $ScriptDir "$PackageType\packages-$prof.txt"
 
         if (Test-Path $packageFile) {
-            return Get-Content $packageFile | Where-Object {
+            $allPackages += Get-Content $packageFile | Where-Object {
                 $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
             }
         }
-
-        return @()
     }
+
+    return $allPackages | Select-Object -Unique
 }
 
 # Show help if requested
@@ -91,6 +96,7 @@ if ($Help) {
     Write-Host "  .\install.ps1 -Profile dev         Development tools"
     Write-Host "  .\install.ps1 -Profile infra       Infrastructure/virtualization"
     Write-Host "  .\install.ps1 -Profile full        Everything combined"
+    Write-Host "  .\install.ps1 -Profile home,dev    Several profiles in one pass"
     Write-Host "  .\install.ps1 -DryRun              Preview packages without installing"
     Write-Host "  .\install.ps1 -ShowCommands        Display individual winget commands"
     Write-Host "  .\install.ps1 -Help                Show this help message"
@@ -101,16 +107,18 @@ if ($Help) {
     Write-Host "  personal - Personal productivity (Windows Terminal, Teams, VLC, etc.)"
     Write-Host "  dev      - Development tools (Claude, Python, Cloud CLIs, editors)"
     Write-Host "  infra    - Infrastructure (Docker, VMware, Vagrant, DBeaver)"
-    Write-Host "  full     - All profiles combined"
+    Write-Host "  full     - Shorthand for home,personal,dev,infra"
+    Write-Host ""
+    Write-Host "  Profiles compose: pass a comma-separated list and the packages are"
+    Write-Host "  merged and de-duplicated into a single pass. A single profile means"
+    Write-Host "  exactly that profile - -Profile dev does NOT pull in home."
     Write-Host ""
     Write-Host "EXAMPLES:" -ForegroundColor Yellow
     Write-Host "  # Family computer (default)"
     Write-Host "  .\install.ps1"
     Write-Host ""
-    Write-Host "  # Your personal workstation"
-    Write-Host "  .\install.ps1 -Profile home"
-    Write-Host "  .\install.ps1 -Profile personal"
-    Write-Host "  .\install.ps1 -Profile dev"
+    Write-Host "  # Your personal workstation, one pass"
+    Write-Host "  .\install.ps1 -Profile home,personal,dev"
     Write-Host ""
     Write-Host "  # Everything at once"
     Write-Host "  .\install.ps1 -Profile full"
@@ -146,15 +154,17 @@ Write-Host ""
 # Use script directory if available, otherwise use current directory
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
 
-Write-Step "Reading winget package list..."
-Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
-Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
+$profilesToInstall = Expand-Profiles -ProfileNames $InstallProfile
 
-$packages = Get-PackagesFromProfile -PackageType "winget" -ProfileName $InstallProfile -ScriptDir $scriptDir
-$npmPackages = Get-PackagesFromProfile -PackageType "npm" -ProfileName $InstallProfile -ScriptDir $scriptDir
+Write-Step "Reading package lists..."
+Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
+Write-Host "Profiles: $($profilesToInstall -join ', ')" -ForegroundColor Gray
+
+$packages = @(Get-PackagesFromProfile -PackageType "winget" -ProfileNames $profilesToInstall -ScriptDir $scriptDir)
+$npmPackages = @(Get-PackagesFromProfile -PackageType "npm" -ProfileNames $profilesToInstall -ScriptDir $scriptDir)
 
 if ($packages.Count -eq 0 -and $npmPackages.Count -eq 0) {
-    Write-Err "No packages found for profile: $InstallProfile"
+    Write-Err "No packages found for profiles: $($profilesToInstall -join ', ')"
     Write-Host "Available profiles: home, personal, dev, infra, full" -ForegroundColor Yellow
     exit 1
 }
