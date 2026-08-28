@@ -78,6 +78,57 @@ winget search kaspersky
 
 ---
 
+## VMware Workstation Pro
+
+**Status:** ⚠️ Not available in winget - Requires manual installation
+
+**Why manual:**
+- Following the Broadcom acquisition, distribution moved to Broadcom's own
+  portal and the package was dropped from the winget repository
+- Downloading requires a free Broadcom account
+- The `VMware` publisher still exists in winget but only ships SpringToolSuite
+
+**Installation:**
+
+1. Create a free account at https://www.broadcom.com/
+2. Go to the support portal downloads section
+3. Select **VMware Workstation Pro** for Windows
+4. Accept the terms and download the installer
+
+**Note:** Workstation Pro is free for personal, non-commercial use. Commercial
+use requires a paid license.
+
+**Alternative (available via winget):**
+- VirtualBox: `winget install Oracle.VirtualBox`
+- Hyper-V: built into Windows Pro/Enterprise, enable via
+  "Turn Windows features on or off"
+
+---
+
+## Krisp
+
+**Status:** ⚠️ Not available in winget - Requires manual installation
+
+**Why manual:**
+- Krisp is distributed only from the vendor's own site
+- Requires account registration to activate
+- No publisher matching "Krisp" exists in the winget repository
+
+**Installation:**
+
+1. Download from https://krisp.ai/
+2. Run the installer
+3. Create or sign in to a Krisp account
+
+**Note:** The free tier caps noise-cancelled minutes per week.
+
+**Alternatives (free):**
+- **NVIDIA Broadcast** - noise removal on RTX GPUs, https://www.nvidia.com/broadcast/
+- **Built-in suppression** - Microsoft Teams and Zoom both ship their own noise
+  suppression, which may be enough on its own
+
+---
+
 ## Adobe Acrobat Reader
 
 **Status:** ✅ Usually available via winget as `Adobe.Acrobat.Reader.64-bit`

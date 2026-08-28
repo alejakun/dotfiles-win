@@ -12,7 +12,6 @@ Microsoft.PowerToys
 
 # Communication & Collaboration
 Microsoft.Teams
-Krisp.Krisp
 
 # Utilities
 ShareX.ShareX
