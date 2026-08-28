@@ -1,9 +1,9 @@
 #!/usr/bin/env pwsh
 # ================================================================================
-# dotfiles-win Bootstrap - Full Profile
+# dotfiles-win Bootstrap - Max Profile
 # ================================================================================
-# Installs: HOME + PERSONAL + DEV + INFRA (everything)
-# Usage: iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-full.ps1 | iex
+# Installs: everything (MINI + BASE + PLUS + PRO + MAX)
+# Usage: iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-max.ps1 | iex
 
-$env:DOTFILES_PROFILE="full"
+$env:DOTFILES_PROFILE="max"
 iex (iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 -UseBasicParsing)

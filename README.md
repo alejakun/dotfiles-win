@@ -8,97 +8,75 @@
 
 ### One-Line Installation
 
-Open **PowerShell** and run one of these commands:
+Profiles form a ladder — **each one installs every level below it**:
 
-**HOME only** (family computers - essential apps):
+```
+mini  ->  base  ->  plus  ->  pro  ->  max
+```
+
+Open **PowerShell** and run the line for the level you want:
+
+**mini** (family computers — the essentials):
 ```powershell
 iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 ```
 
-**HOME + PERSONAL** (your personal laptop):
+**base** (adds passwords, calls and media):
 ```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-personal.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-base.ps1 | iex
 ```
 
-**HOME + DEV** (development workstation):
+**plus** (your own machine — browsers, editors, terminals):
 ```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-dev.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-plus.ps1 | iex
 ```
 
-**HOME + INFRA** (infrastructure workstation):
+**pro** (adds runtimes, cloud CLIs and databases):
 ```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-infra.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-pro.ps1 | iex
 ```
 
-**FULL** (everything - home + personal + dev + infra):
+**max** (adds containers and virtualization):
 ```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-full.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-max.ps1 | iex
 ```
-
-> **Note:** Every one-liner except the HOME one requests `home,<profile>`, so the
-> HOME base is always included. Running `install.ps1` by hand installs exactly the
-> profiles you name — `-Profile dev` is dev only.
 
 ---
 
 ## 📋 Profiles
 
-### 🏠 HOME (Default)
-**Purpose:** Essential applications for family computers
+| Profile | Adds | Total | For |
+|---|---|---|---|
+| `mini` | 8 | 8 | Family computers |
+| `base` | +7 | 15 | Everyday use |
+| `plus` | +14 | 29 | Your own machine |
+| `pro` | +5 | 34 | Working with infrastructure |
+| `max` | +2 | 36 | Running infrastructure locally |
 
-**Includes:**
-- Git, GitHub CLI, VSCode
-- Browsers (Chrome, Firefox)
-- 7-Zip, Dropbox
-- Bitwarden (password manager)
-- Rambox, Zoom
-- Doxie Scanner
-- LocalSend (transferencia de archivos en red local)
-- QuickLook (vista previa con barra espaciadora)
-- TeamViewer, AnyDesk
-- Adobe Acrobat Reader
-- Google Earth Pro
+### 🏠 mini — 8
+Browsers (Chrome, Firefox) · Adobe Acrobat Reader · Google Earth Pro · 7-Zip ·
+TeamViewer · AnyDesk · Microsoft Office
 
-### 💼 PERSONAL
-**Purpose:** Personal productivity tools
+Office installs unattended and asks you to sign in the first time you open an app.
 
-**Includes:**
-- Windows Terminal
-- PowerToys
-- Microsoft Teams
-- ShareX (screenshots)
-- VLC Media Player
-- Google Drive Desktop
-- Tailscale (VPN mesh network)
+### 📦 base — +7
+Bitwarden · Rambox · Zoom · Doxie Scanner · QuickLook · ShareX · VLC
 
-**Note:** Krisp is not available via winget.
-See [MANUAL_INSTALL.md](MANUAL_INSTALL.md).
+### 💼 plus — +14
+Dropbox · Brave · Zen Browser · Git · GitHub CLI · VSCode · Windows Terminal ·
+WezTerm · Rio · PowerToys · Tailscale · Claude Code · Sublime Text 4 · Spark
 
-### 👨‍💻 DEV
-**Purpose:** Development tools for frequent use
+### 👨‍💻 pro — +5
+Node.js · Python 3.12 · Google Cloud SDK · AWS CLI · DBeaver Community
 
-**Includes:**
-- Claude Code (AI assistant)
-- Python 3.12
-- Node.js
-- Sublime Text 4
-- Notepad++
-- Google Cloud SDK (gcloud, bq, gsutil)
-- AWS CLI
+Read `pro` as *you work with infrastructure* and `max` as *you also run it
+locally* — which is why one extends the other.
 
-### 🏗️ INFRA
-**Purpose:** Infrastructure & virtualization (resource-intensive)
+### 🏗️ max — +2
+Docker Desktop · Vagrant
 
-**Includes:**
-- DBeaver Community Edition (database tool)
-- Docker Desktop
-- Vagrant
-
-**Note:** Ansible and VMware Workstation Pro are not available via winget.
-See [MANUAL_INSTALL.md](MANUAL_INSTALL.md).
-
-### 🌐 FULL
-**Purpose:** Everything combined (home + personal + dev + infra)
+**Note:** Ansible is not available via winget and does not support Windows as a
+control node. See [MANUAL_INSTALL.md](MANUAL_INSTALL.md) for the WSL route.
 
 ---
 
@@ -113,27 +91,25 @@ See [Quick Start](#-quick-start) above.
 ```powershell
 git clone https://github.com/alejakun/dotfiles-win.git
 cd dotfiles-win
-.\install.ps1 -Profile home
+.\install.ps1 -Profile plus
 ```
 
-### Method 3: Composing Profiles
+### Method 3: Picking a Level
 
-Profiles compose. Pass a comma-separated list and the packages are merged,
-de-duplicated and installed in a single pass:
+Each profile includes the ones below it, so a single command is always enough:
 
 ```powershell
-.\install.ps1 -Profile home,personal,dev   # your personal workstation
-.\install.ps1 -Profile home,dev            # what bootstrap-dev.ps1 runs
+.\install.ps1 -Profile plus    # mini + base + plus
+.\install.ps1 -Profile max     # everything
 ```
 
-A single profile means exactly that profile, which is useful when you want the
-dev tooling on a machine without the home apps:
+Packages already installed are detected and skipped, so moving up a level later
+only installs what is missing:
 
 ```powershell
-.\install.ps1 -Profile dev                 # dev only, no home
+.\install.ps1 -Profile plus    # today
+.\install.ps1 -Profile pro     # later, adds only the pro layer
 ```
-
-`full` is shorthand for `home,personal,dev,infra`.
 
 ---
 
@@ -142,16 +118,18 @@ dev tooling on a machine without the home apps:
 ### Preview Mode (Dry Run)
 
 ```powershell
-.\install.ps1 -Profile personal -DryRun
+.\install.ps1 -Profile plus -DryRun
 ```
 
 ### Show Individual Commands
 
 ```powershell
-.\install.ps1 -Profile dev -ShowCommands
+.\install.ps1 -Profile max -ShowCommands
 ```
 
-This displays individual `winget install` commands you can copy/paste.
+This displays individual `winget install` commands you can copy/paste. It is also
+the escape hatch when you want a single package without its whole layer — say
+Docker on a machine that has no use for Node or the cloud CLIs.
 
 ### Help
 
@@ -186,7 +164,8 @@ If not installed, get it from [Microsoft Store](https://www.microsoft.com/p/app-
    winget search "App Name"
    ```
 
-2. Add to appropriate profile file (`winget/packages-home.txt`, `packages-personal.txt`, etc.):
+2. Add to the profile file for the lowest level that should get it
+   (`winget/packages-mini.txt`, `packages-plus.txt`, etc.):
    ```txt
    # My additions
    Notepad++.Notepad++
@@ -281,19 +260,20 @@ aws --version
 
 ```
 dotfiles-win/
-├── bootstrap.ps1                 # Remote installation script
-├── bootstrap-personal.ps1        # One-liner: home + personal
-├── bootstrap-dev.ps1             # One-liner: home + dev
-├── bootstrap-infra.ps1           # One-liner: home + infra
-├── bootstrap-full.ps1            # One-liner: everything
+├── bootstrap.ps1                 # Remote installer + mini one-liner
+├── bootstrap-base.ps1            # One-liner: base
+├── bootstrap-plus.ps1            # One-liner: plus
+├── bootstrap-pro.ps1             # One-liner: pro
+├── bootstrap-max.ps1             # One-liner: max
 ├── install.ps1                   # Main installation script
 ├── winget/
-│   ├── packages-home.txt         # Home profile (default)
-│   ├── packages-personal.txt     # Personal productivity
-│   ├── packages-dev.txt          # Development tools
-│   └── packages-infra.txt        # Infrastructure/virtualization
+│   ├── packages-mini.txt         # Each file holds only its own layer;
+│   ├── packages-base.txt         # install.ps1 walks the ladder and
+│   ├── packages-plus.txt         # merges every level below the one
+│   ├── packages-pro.txt          # you asked for
+│   └── packages-max.txt
 ├── npm/
-│   └── packages-dev.txt          # Global npm packages (dev profile)
+│   └── packages-pro.txt          # Global npm packages (needs Node.js, in pro)
 ├── MANUAL_INSTALL.md             # Manual installation guide
 └── README.md                     # This file
 ```

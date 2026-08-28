@@ -5,8 +5,8 @@
 # Installs common applications using winget
 #
 # Usage:
-#   .\install.ps1                # Install all packages
-#   .\install.ps1 -Profile home,dev
+#   .\install.ps1                # Install the mini profile (default)
+#   .\install.ps1 -Profile plus  # Each profile includes the ones below it
 #   .\install.ps1 -DryRun        # Show what would be installed
 #   .\install.ps1 -ShowCommands  # Display individual winget commands
 #   .\install.ps1 -Help          # Show help message
@@ -15,9 +15,9 @@ param(
     [switch]$DryRun,
     [switch]$ShowCommands,
     [switch]$Help,
-    [ValidateSet("home", "personal", "dev", "infra", "full")]
+    [ValidateSet("mini", "base", "plus", "pro", "max")]
     [Alias("Profile")]
-    [string[]]$InstallProfile = @("home")
+    [string]$InstallProfile = "mini"
 )
 
 # Colors for output
@@ -41,23 +41,9 @@ function Write-Err {
     Write-Host "[-] $Message" -ForegroundColor Red
 }
 
-# "full" is shorthand for every profile. Everything else is taken literally, so
-# the caller composes what it wants: -Profile home,dev installs exactly those two.
-function Expand-Profiles {
-    param([string[]]$ProfileNames)
-
-    $expanded = @()
-
-    foreach ($prof in $ProfileNames) {
-        if ($prof -eq "full") {
-            $expanded += @("home", "personal", "dev", "infra")
-        } else {
-            $expanded += $prof
-        }
-    }
-
-    return $expanded | Select-Object -Unique
-}
+# Profiles form a ladder: each one extends the one before it, so installing
+# "plus" installs mini + base + plus. The chain is the install order too.
+$ProfileLadder = @("mini", "base", "plus", "pro", "max")
 
 # Helper function to read packages from profile files
 function Get-PackagesFromProfile {
@@ -90,44 +76,45 @@ if ($Help) {
     Write-Host "=====================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "USAGE:" -ForegroundColor Yellow
-    Write-Host "  .\install.ps1                      Install home profile (default)"
-    Write-Host "  .\install.ps1 -Profile home        Family/essential apps"
-    Write-Host "  .\install.ps1 -Profile personal    Personal productivity tools"
-    Write-Host "  .\install.ps1 -Profile dev         Development tools"
-    Write-Host "  .\install.ps1 -Profile infra       Infrastructure/virtualization"
-    Write-Host "  .\install.ps1 -Profile full        Everything combined"
-    Write-Host "  .\install.ps1 -Profile home,dev    Several profiles in one pass"
+    Write-Host "  .\install.ps1                      Install mini profile (default)"
+    Write-Host "  .\install.ps1 -Profile mini        Family computers"
+    Write-Host "  .\install.ps1 -Profile base        + passwords, calls, media"
+    Write-Host "  .\install.ps1 -Profile plus        + browsers, editors, terminals"
+    Write-Host "  .\install.ps1 -Profile pro         + runtimes, cloud CLIs, databases"
+    Write-Host "  .\install.ps1 -Profile max         + containers and virtualization"
     Write-Host "  .\install.ps1 -DryRun              Preview packages without installing"
     Write-Host "  .\install.ps1 -ShowCommands        Display individual winget commands"
     Write-Host "  .\install.ps1 -Help                Show this help message"
     Write-Host ""
     Write-Host "PROFILES:" -ForegroundColor Yellow
-    Write-Host "  home     - Essential apps for family computers (DEFAULT)"
-    Write-Host "             Git, VSCode, browsers, Dropbox, Zoom, etc."
-    Write-Host "  personal - Personal productivity (Windows Terminal, Teams, VLC, etc.)"
-    Write-Host "  dev      - Development tools (Claude, Python, Cloud CLIs, editors)"
-    Write-Host "  infra    - Infrastructure (Docker, VMware, Vagrant, DBeaver)"
-    Write-Host "  full     - Shorthand for home,personal,dev,infra"
+    Write-Host "  Each profile extends the one before it, so picking a level installs"
+    Write-Host "  every level below it as well:"
     Write-Host ""
-    Write-Host "  Profiles compose: pass a comma-separated list and the packages are"
-    Write-Host "  merged and de-duplicated into a single pass. A single profile means"
-    Write-Host "  exactly that profile - -Profile dev does NOT pull in home."
+    Write-Host "    mini -> base -> plus -> pro -> max"
+    Write-Host ""
+    Write-Host "  mini - Family computers (DEFAULT). Browsers, Office, Reader,"
+    Write-Host "         Earth Pro, 7-Zip, TeamViewer, AnyDesk"
+    Write-Host "  base - + Bitwarden, Rambox, Zoom, Doxie, QuickLook, ShareX, VLC"
+    Write-Host "  plus - + Dropbox, Brave, Zen, Git, VSCode, terminals, Tailscale,"
+    Write-Host "         Claude Code, Sublime Text, Spark"
+    Write-Host "  pro  - + Node.js, Python, gcloud, AWS CLI, DBeaver"
+    Write-Host "  max  - + Docker Desktop, Vagrant"
     Write-Host ""
     Write-Host "EXAMPLES:" -ForegroundColor Yellow
     Write-Host "  # Family computer (default)"
     Write-Host "  .\install.ps1"
     Write-Host ""
-    Write-Host "  # Your personal workstation, one pass"
-    Write-Host "  .\install.ps1 -Profile home,personal,dev"
+    Write-Host "  # Your own machine"
+    Write-Host "  .\install.ps1 -Profile plus"
     Write-Host ""
-    Write-Host "  # Everything at once"
-    Write-Host "  .\install.ps1 -Profile full"
+    Write-Host "  # Everything"
+    Write-Host "  .\install.ps1 -Profile max"
     Write-Host ""
     Write-Host "  # Preview what would be installed"
-    Write-Host "  .\install.ps1 -Profile personal -DryRun"
+    Write-Host "  .\install.ps1 -Profile plus -DryRun"
     Write-Host ""
     Write-Host "  # See individual commands to copy/paste"
-    Write-Host "  .\install.ps1 -ShowCommands -Profile dev"
+    Write-Host "  .\install.ps1 -ShowCommands -Profile max"
     Write-Host ""
     exit 0
 }
@@ -154,18 +141,18 @@ Write-Host ""
 # Use script directory if available, otherwise use current directory
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
 
-$profilesToInstall = Expand-Profiles -ProfileNames $InstallProfile
+$profilesToInstall = $ProfileLadder[0..$ProfileLadder.IndexOf($InstallProfile)]
 
 Write-Step "Reading package lists..."
 Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
-Write-Host "Profiles: $($profilesToInstall -join ', ')" -ForegroundColor Gray
+Write-Host "Profile: $InstallProfile -> $($profilesToInstall -join ' + ')" -ForegroundColor Gray
 
 $packages = @(Get-PackagesFromProfile -PackageType "winget" -ProfileNames $profilesToInstall -ScriptDir $scriptDir)
 $npmPackages = @(Get-PackagesFromProfile -PackageType "npm" -ProfileNames $profilesToInstall -ScriptDir $scriptDir)
 
 if ($packages.Count -eq 0 -and $npmPackages.Count -eq 0) {
     Write-Err "No packages found for profiles: $($profilesToInstall -join ', ')"
-    Write-Host "Available profiles: home, personal, dev, infra, full" -ForegroundColor Yellow
+    Write-Host "Available profiles: mini, base, plus, pro, max" -ForegroundColor Yellow
     exit 1
 }
 

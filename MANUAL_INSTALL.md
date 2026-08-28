@@ -6,33 +6,63 @@ Some applications may not be available via winget or require manual installation
 
 ## Microsoft Office
 
-**Status:** ⚠️ Requires license and manual installation
+**Status:** ✅ Installed automatically as part of the `mini` profile
 
-**Why manual:**
-- Requires valid Microsoft 365 subscription or standalone license
-- Needs Microsoft account authentication
-- Corporate deployments use organization-specific methods
+Office is no longer a manual install. `Microsoft.Office` is in the winget
+repository and ships the Click-to-Run installer, so it installs unattended along
+with the rest of the profile.
 
-**Installation:**
+**What still needs you:**
+- Activation happens on **first launch**, not at install time. Open any Office app
+  and sign in with the Microsoft account that holds the licence.
+- Without a Microsoft 365 subscription or a standalone licence, the apps install
+  but run in reduced-functionality mode.
+- Corporate machines may be required to use the organisation's own deployment
+  method instead — check with your IT department before relying on this.
 
-1. **Microsoft 365 (Subscription)**
-   - Visit: https://www.office.com/
-   - Sign in with your Microsoft account
-   - Install from your account dashboard
+**If the winget installation fails:**
 
-2. **Standalone Office**
-   - Visit: https://www.microsoft.com/microsoft-365/buy/compare-all-microsoft-365-products
-   - Purchase and download
-   - Activate with product key
-
-3. **Corporate/Organization**
-   - Use your organization's deployment portal
-   - Contact IT department for installation instructions
+1. Visit https://www.office.com/
+2. Sign in with your Microsoft account
+3. Install from your account dashboard
 
 **Alternative (Free):**
 - LibreOffice: `winget install TheDocumentFoundation.LibreOffice`
 - OnlyOffice: `winget install ONLYOFFICE.DesktopEditors`
 - Web-based: https://www.office.com/ (limited features, free)
+
+---
+
+## Ansible
+
+**Status:** ⚠️ Not available in winget - and not supported on Windows natively
+
+**Why manual:**
+- No publisher matching "Ansible" exists in the winget repository
+- More importantly, Ansible does not support Windows as a **control node**.
+  Installing it with `pip` on native Windows produces a configuration the Ansible
+  project does not support, even though the install itself succeeds.
+- The supported path on Windows is WSL. Windows machines can still be *managed*
+  as targets from a Linux control node.
+
+**Installation (via WSL):**
+
+1. Enable WSL if you have not already:
+   ```powershell
+   wsl --install
+   ```
+2. Restart, then open the Linux shell and install Ansible:
+   ```bash
+   sudo apt update
+   sudo apt install ansible
+   ```
+3. Verify:
+   ```bash
+   ansible --version
+   ```
+
+**Alternative:** run Ansible from any Linux or macOS machine you already have,
+and point it at the Windows hosts you want to manage.
 
 ---
 

@@ -1,0 +1,18 @@
+# ================================================================================
+# Windows Package Installation List - Pro Profile
+# ================================================================================
+# Install via: winget install --id <PackageId>
+#
+# For machines that work with infrastructure: runtimes, cloud CLIs, databases.
+# Installing this profile also installs mini, base and plus.
+
+# Runtimes
+OpenJS.NodeJS
+Python.Python.3.12
+
+# Cloud CLI Tools
+Google.CloudSDK
+Amazon.AWSCLI
+
+# Database Tools
+DBeaver.DBeaver.Community

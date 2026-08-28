@@ -1,0 +1,27 @@
+# ================================================================================
+# Windows Package Installation List - Mini Profile
+# ================================================================================
+# Install via: winget install --id <PackageId>
+#
+# Smallest layer: what a family computer needs to be useful.
+# Every other profile builds on top of this one.
+
+# Browsers
+Google.Chrome
+Mozilla.Firefox
+
+# Viewers
+Adobe.Acrobat.Reader.64-bit
+
+# Geographic Tools
+Google.EarthPro
+
+# Utilities
+7zip.7zip
+
+# Remote Access
+TeamViewer.TeamViewer
+AnyDesk.AnyDesk
+
+# Office Suite (installs unattended, asks to sign in on first launch)
+Microsoft.Office

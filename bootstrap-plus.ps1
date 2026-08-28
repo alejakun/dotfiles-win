@@ -1,9 +1,9 @@
 #!/usr/bin/env pwsh
 # ================================================================================
-# dotfiles-win Bootstrap - Dev Profile
+# dotfiles-win Bootstrap - Plus Profile
 # ================================================================================
-# Installs: HOME + DEV
-# Usage: iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-dev.ps1 | iex
+# Installs: MINI + BASE + PLUS
+# Usage: iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-plus.ps1 | iex
 
-$env:DOTFILES_PROFILE="home,dev"
+$env:DOTFILES_PROFILE="plus"
 iex (iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 -UseBasicParsing)

@@ -1,9 +1,9 @@
 #!/usr/bin/env pwsh
 # ================================================================================
-# dotfiles-win Bootstrap - Personal Profile
+# dotfiles-win Bootstrap - Pro Profile
 # ================================================================================
-# Installs: HOME + PERSONAL
-# Usage: iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-personal.ps1 | iex
+# Installs: MINI + BASE + PLUS + PRO
+# Usage: iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-pro.ps1 | iex
 
-$env:DOTFILES_PROFILE="home,personal"
+$env:DOTFILES_PROFILE="pro"
 iex (iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 -UseBasicParsing)
