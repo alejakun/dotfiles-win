@@ -307,10 +307,12 @@ if ($DryRun) {
     Write-Host "[=] Already installed: $present" -ForegroundColor Gray
     Write-Host "[+] Would install:     $missing" -ForegroundColor Green
     Write-Host ""
-    Write-Host "Detection relies on winget matching an installed program to its" -ForegroundColor DarkGray
-    Write-Host "catalogue. An app installed by hand that it cannot match shows as" -ForegroundColor DarkGray
-    Write-Host "[+]; installing over it is usually harmless, but see MANUAL_INSTALL.md" -ForegroundColor DarkGray
-    Write-Host "for the Office caveat." -ForegroundColor DarkGray
+    Write-Host "Detection asks winget whether it can match an installed program to" -ForegroundColor DarkGray
+    Write-Host "its catalogue, except for the few packages that carry their own check." -ForegroundColor DarkGray
+    Write-Host "Something installed from a different source - the Microsoft Store" -ForegroundColor DarkGray
+    Write-Host "rather than winget, say - is a different package as far as winget is" -ForegroundColor DarkGray
+    Write-Host "concerned: it shows as [+] and would be installed alongside, not over," -ForegroundColor DarkGray
+    Write-Host "what you already have. Check with: winget list <name>" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "Run without -DryRun to install them" -ForegroundColor Yellow
     exit 0
