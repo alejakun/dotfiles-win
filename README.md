@@ -90,6 +90,17 @@ See [Quick Start](#-quick-start) above.
 
 ### Method 2: Manual Clone
 
+Needs git, which this repo installs in `plus` — so on a fresh machine use the
+one-liner, or grab the zip:
+
+```powershell
+iwr -useb https://github.com/alejakun/dotfiles-win/archive/refs/heads/master.zip -OutFile dotfiles.zip
+Expand-Archive dotfiles.zip -DestinationPath .
+cd dotfiles-win-master
+```
+
+With git available:
+
 ```powershell
 git clone https://github.com/alejakun/dotfiles-win.git
 cd dotfiles-win
@@ -118,6 +129,17 @@ only installs what is missing:
 ## 🛠️ Advanced Usage
 
 ### Preview Mode (Dry Run)
+
+Needs neither git nor elevation, so it works on a machine straight out of the box:
+
+```powershell
+$env:DOTFILES_PROFILE="plus"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+```
+
+`DOTFILES_DRYRUN` is consumed on read, so the next run in the same terminal
+installs for real rather than silently previewing again.
+
+From a cloned repo:
 
 ```powershell
 .\install.ps1 -Profile plus -DryRun

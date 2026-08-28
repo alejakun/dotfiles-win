@@ -12,6 +12,9 @@
 #   $env:DOTFILES_PROFILE="pro"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #   $env:DOTFILES_PROFILE="max"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #
+# Preview without installing anything (no git and no elevation needed):
+#   $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+#
 # What this does:
 #   1. Checks prerequisites (winget)
 #   2. Downloads installation files from GitHub
@@ -25,6 +28,11 @@
 # Read the profile from the environment variable or use the smallest one
 $InstallProfile = if ($env:DOTFILES_PROFILE) { $env:DOTFILES_PROFILE.Trim() } else { "mini" }
 $ValidProfiles = @("mini", "base", "plus", "pro", "max")
+
+# Preview only. Consumed immediately: left set, the next real run in this same
+# terminal would silently install nothing.
+$DryRun = [bool]$env:DOTFILES_DRYRUN
+Remove-Item Env:\DOTFILES_DRYRUN -ErrorAction SilentlyContinue
 
 if ($InstallProfile -notin $ValidProfiles) {
     Write-Host "[-] Invalid profile: $InstallProfile" -ForegroundColor Red
@@ -90,8 +98,13 @@ if ($PSVersionTable.PSVersion.Major -lt 5) {
 }
 Write-Success "PowerShell version: $($PSVersionTable.PSVersion)"
 
-# Check for elevation
-if (-not (Test-Administrator)) {
+# Check for elevation. A dry run installs nothing, so it only warns.
+if (Test-Administrator) {
+    Write-Success "Running as administrator"
+} elseif ($DryRun) {
+    Write-Warn "Not running as administrator"
+    Write-Host "  This preview works, but the real install will not." -ForegroundColor Gray
+} else {
     Write-Err "Administrator privileges required"
     Write-Host ""
     Write-Host "Most packages here - Office, Docker, TeamViewer and others - install" -ForegroundColor Yellow
@@ -107,7 +120,6 @@ if (-not (Test-Administrator)) {
     Write-Host ""
     exit 1
 }
-Write-Success "Running as administrator"
 
 # Check winget availability
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
@@ -212,7 +224,11 @@ try {
         Set-Location $InstallDir
 
         # Execute the script directly
-        & $installScript -InstallProfile $InstallProfile
+        if ($DryRun) {
+            & $installScript -InstallProfile $InstallProfile -DryRun
+        } else {
+            & $installScript -InstallProfile $InstallProfile
+        }
 
         $exitCode = $LASTEXITCODE
     } finally {
