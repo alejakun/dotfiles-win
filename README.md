@@ -51,6 +51,8 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 - Bitwarden (password manager)
 - Rambox, Zoom
 - Doxie Scanner
+- LocalSend (transferencia de archivos en red local)
+- QuickLook (vista previa con barra espaciadora)
 - TeamViewer, AnyDesk
 - Adobe Acrobat Reader
 - Google Earth Pro
@@ -74,6 +76,7 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 **Includes:**
 - Claude Code (AI assistant)
 - Python 3.12
+- Node.js
 - Sublime Text 4
 - Notepad++
 - Google Cloud SDK (gcloud, bq, gsutil)
@@ -266,13 +269,18 @@ aws --version
 ```
 dotfiles-win/
 ├── bootstrap.ps1                 # Remote installation script
+├── bootstrap-personal.ps1        # One-liner: home + personal
+├── bootstrap-dev.ps1             # One-liner: home + dev
+├── bootstrap-infra.ps1           # One-liner: home + infra
+├── bootstrap-full.ps1            # One-liner: everything
 ├── install.ps1                   # Main installation script
 ├── winget/
 │   ├── packages-home.txt         # Home profile (default)
 │   ├── packages-personal.txt     # Personal productivity
 │   ├── packages-dev.txt          # Development tools
-│   ├── packages-infra.txt        # Infrastructure/virtualization
-│   └── packages-full.txt         # All profiles combined
+│   └── packages-infra.txt        # Infrastructure/virtualization
+├── npm/
+│   └── packages-dev.txt          # Global npm packages (dev profile)
 ├── MANUAL_INSTALL.md             # Manual installation guide
 └── README.md                     # This file
 ```
@@ -311,8 +319,8 @@ winget uninstall --id PackageId
 
 ## 📝 License
 
-MIT License - See [LICENSE](LICENSE) file for details
+Personal project - no license specified.
 
 ---
 
-**Last updated:** 2025-10-21
+**Last updated:** 2026-08-28

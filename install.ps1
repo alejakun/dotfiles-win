@@ -15,7 +15,8 @@ param(
     [switch]$ShowCommands,
     [switch]$Help,
     [ValidateSet("home", "personal", "dev", "infra", "full")]
-    [string]$Profile = "home"
+    [Alias("Profile")]
+    [string]$InstallProfile = "home"
 )
 
 # Colors for output
@@ -29,12 +30,12 @@ function Write-Success {
     Write-Host "[+] $Message" -ForegroundColor Green
 }
 
-function Write-Warning {
+function Write-Warn {
     param([string]$Message)
     Write-Host "[!] $Message" -ForegroundColor Yellow
 }
 
-function Write-Error {
+function Write-Err {
     param([string]$Message)
     Write-Host "[-] $Message" -ForegroundColor Red
 }
@@ -43,11 +44,11 @@ function Write-Error {
 function Get-PackagesFromProfile {
     param(
         [string]$PackageType,  # "winget" or "npm"
-        [string]$Profile,
+        [string]$ProfileName,
         [string]$ScriptDir
     )
 
-    if ($Profile -eq "full") {
+    if ($ProfileName -eq "full") {
         $profileFiles = @("home", "personal", "dev", "infra")
         $allPackages = @()
 
@@ -64,7 +65,7 @@ function Get-PackagesFromProfile {
 
         return $allPackages | Select-Object -Unique
     } else {
-        $packageFile = Join-Path $ScriptDir "$PackageType\packages-$Profile.txt"
+        $packageFile = Join-Path $ScriptDir "$PackageType\packages-$ProfileName.txt"
 
         if (Test-Path $packageFile) {
             return Get-Content $packageFile | Where-Object {
@@ -133,7 +134,7 @@ Write-Host ""
 # Check if winget is available
 Write-Step "Checking winget availability..."
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Error "winget not found!"
+    Write-Err "winget not found!"
     Write-Host "Please install App Installer from Microsoft Store:" -ForegroundColor Yellow
     Write-Host "  https://www.microsoft.com/p/app-installer/9nblggh4nns1" -ForegroundColor Yellow
     exit 1
@@ -149,15 +150,19 @@ Write-Step "Reading winget package list..."
 Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
 Write-Host "Current location: $(Get-Location)" -ForegroundColor Gray
 
-$packages = Get-PackagesFromProfile -PackageType "winget" -Profile $Profile -ScriptDir $scriptDir
+$packages = Get-PackagesFromProfile -PackageType "winget" -ProfileName $InstallProfile -ScriptDir $scriptDir
+$npmPackages = Get-PackagesFromProfile -PackageType "npm" -ProfileName $InstallProfile -ScriptDir $scriptDir
 
-if ($packages.Count -eq 0) {
-    Write-Error "No winget packages found for profile: $Profile"
+if ($packages.Count -eq 0 -and $npmPackages.Count -eq 0) {
+    Write-Err "No packages found for profile: $InstallProfile"
     Write-Host "Available profiles: home, personal, dev, infra, full" -ForegroundColor Yellow
     exit 1
 }
 
-Write-Host "Found $($packages.Count) packages to install" -ForegroundColor White
+Write-Host "Found $($packages.Count) winget packages to install" -ForegroundColor White
+if ($npmPackages.Count -gt 0) {
+    Write-Host "Found $($npmPackages.Count) npm packages to install" -ForegroundColor White
+}
 Write-Host ""
 
 # Show commands mode
@@ -171,6 +176,9 @@ if ($ShowCommands) {
     $packages | ForEach-Object {
         Write-Host "winget install --id $_ -e --source winget" -ForegroundColor Green
     }
+    $npmPackages | ForEach-Object {
+        Write-Host "npm install -g $_" -ForegroundColor Green
+    }
     Write-Host ""
     Write-Host "TIP: Use these commands to install only specific packages" -ForegroundColor Cyan
     Write-Host ""
@@ -179,11 +187,18 @@ if ($ShowCommands) {
 
 # Dry run mode
 if ($DryRun) {
-    Write-Warning "DRY RUN MODE - No packages will be installed"
+    Write-Warn "DRY RUN MODE - No packages will be installed"
     Write-Host ""
-    Write-Host "Packages that would be installed:" -ForegroundColor Yellow
+    Write-Host "winget packages that would be installed:" -ForegroundColor Yellow
     $packages | ForEach-Object {
         Write-Host "  - $_" -ForegroundColor Gray
+    }
+    if ($npmPackages.Count -gt 0) {
+        Write-Host ""
+        Write-Host "npm packages that would be installed:" -ForegroundColor Yellow
+        $npmPackages | ForEach-Object {
+            Write-Host "  - $_" -ForegroundColor Gray
+        }
     }
     Write-Host ""
     Write-Host "Run without -DryRun to install packages" -ForegroundColor Yellow
@@ -220,7 +235,7 @@ foreach ($package in $packages) {
                 Write-Success "  Installed: $package"
                 $installed++
             } else {
-                Write-Warning "  Failed: $package"
+                Write-Warn "  Failed: $package"
                 Write-Host "  Error details:" -ForegroundColor Gray
                 $installResult | ForEach-Object {
                     if ($_ -and $_ -notmatch '^\s*$') {
@@ -231,7 +246,7 @@ foreach ($package in $packages) {
                 $failedPackages += $package
             }
         } catch {
-            Write-Warning "  Error installing: $package"
+            Write-Warn "  Error installing: $package"
             Write-Host "    $($_.Exception.Message)" -ForegroundColor Gray
             $failed++
             $failedPackages += $package
@@ -252,7 +267,7 @@ Write-Host "[-] Failed:           $failed" -ForegroundColor Red
 Write-Host ""
 
 if ($failed -gt 0) {
-    Write-Warning "Failed packages:"
+    Write-Warn "Failed packages:"
     $failedPackages | ForEach-Object {
         Write-Host "  - $_" -ForegroundColor Red
     }
@@ -261,8 +276,6 @@ if ($failed -gt 0) {
 }
 
 # NPM Package Installation
-$npmPackages = Get-PackagesFromProfile -PackageType "npm" -Profile $Profile -ScriptDir $scriptDir
-
 if ($npmPackages.Count -gt 0) {
     Write-Host ""
     Write-Host "=====================================" -ForegroundColor Cyan
@@ -277,7 +290,7 @@ if ($npmPackages.Count -gt 0) {
 
         # Check again after reloading
         if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
-            Write-Warning "npm still not found! Node.js may need to be installed first."
+            Write-Warn "npm still not found! Node.js may need to be installed first."
             Write-Host "Please restart your terminal and run this script again." -ForegroundColor Yellow
             Write-Host ""
         }
@@ -289,39 +302,37 @@ if ($npmPackages.Count -gt 0) {
         Write-Host "Found $($npmPackages.Count) npm packages to install" -ForegroundColor White
         Write-Host ""
 
-        if (-not $DryRun) {
-            $npmInstalled = 0
-            $npmFailed = 0
+        $npmInstalled = 0
+        $npmFailed = 0
 
-            foreach ($package in $npmPackages) {
-                Write-Host "[>] Processing: $package" -ForegroundColor Yellow
+        foreach ($package in $npmPackages) {
+            Write-Host "[>] Processing: $package" -ForegroundColor Yellow
 
-                try {
-                    npm install -g $package --silent 2>&1 | Out-Null
+            try {
+                npm install -g $package --silent 2>&1 | Out-Null
 
-                    if ($LASTEXITCODE -eq 0) {
-                        Write-Success "  Installed: $package"
-                        $npmInstalled++
-                    } else {
-                        Write-Warning "  Failed: $package"
-                        $npmFailed++
-                    }
-                } catch {
-                    Write-Warning "  Error: $package"
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Success "  Installed: $package"
+                    $npmInstalled++
+                } else {
+                    Write-Warn "  Failed: $package"
                     $npmFailed++
                 }
-
-                Write-Host ""
+            } catch {
+                Write-Warn "  Error: $package"
+                $npmFailed++
             }
 
-            # NPM Summary
-            Write-Host "=====================================" -ForegroundColor Cyan
-            Write-Host "NPM Installation Summary" -ForegroundColor Cyan
-            Write-Host "=====================================" -ForegroundColor Cyan
-            Write-Host "[+] Installed: $npmInstalled" -ForegroundColor Green
-            Write-Host "[-] Failed:    $npmFailed" -ForegroundColor Red
             Write-Host ""
         }
+
+        # NPM Summary
+        Write-Host "=====================================" -ForegroundColor Cyan
+        Write-Host "NPM Installation Summary" -ForegroundColor Cyan
+        Write-Host "=====================================" -ForegroundColor Cyan
+        Write-Host "[+] Installed: $npmInstalled" -ForegroundColor Green
+        Write-Host "[-] Failed:    $npmFailed" -ForegroundColor Red
+        Write-Host ""
     }
 }
 
