@@ -12,6 +12,19 @@ Office is no longer a manual install. `Microsoft.Office` is in the winget
 repository and ships the Click-to-Run installer, so it installs unattended along
 with the rest of the profile.
 
+**If Office is already installed on the machine:**
+
+This is the one package where installing over an existing copy is not a no-op.
+The winget package drives Click-to-Run, so on a machine that already has Office —
+common on family computers that shipped with it preinstalled — it can reconfigure
+the edition or the update channel rather than simply detecting the existing
+install and skipping.
+
+`winget list --id Microsoft.Office --exact` tells you whether winget already sees
+it, and `.\install.ps1 -Profile mini -DryRun` shows it as `[=]` if so. If winget
+cannot match it, comment the `Microsoft.Office` line out of
+`winget/packages-mini.txt` before running.
+
 **What still needs you:**
 - Activation happens on **first launch**, not at install time. Open any Office app
   and sign in with the Microsoft account that holds the licence.

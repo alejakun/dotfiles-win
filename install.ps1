@@ -236,19 +236,50 @@ if ($ShowCommands) {
 if ($DryRun) {
     Write-Warn "DRY RUN MODE - No packages will be installed"
     Write-Host ""
-    Write-Host "winget packages that would be installed:" -ForegroundColor Yellow
-    $packages | ForEach-Object {
-        Write-Host "  - $_" -ForegroundColor Gray
+    Write-Step "Checking which packages are already present..."
+    Write-Host "Queries winget once per package, so this takes a moment." -ForegroundColor Gray
+    Write-Host ""
+
+    $present = 0
+    $missing = 0
+
+    foreach ($package in $packages) {
+        # Same check the installer uses, so the preview matches what will happen
+        winget list --id $package --exact 2>&1 | Out-Null
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "  [=] $package" -ForegroundColor Gray
+            $present++
+        } else {
+            Write-Host "  [+] $package" -ForegroundColor Green
+            $missing++
+        }
     }
+
+    Write-Host ""
+    Write-Host "  [=] already installed   [+] would be installed" -ForegroundColor DarkGray
+    Write-Host ""
+
     if ($npmPackages.Count -gt 0) {
-        Write-Host ""
         Write-Host "npm packages that would be installed:" -ForegroundColor Yellow
         $npmPackages | ForEach-Object {
             Write-Host "  - $_" -ForegroundColor Gray
         }
+        Write-Host ""
     }
+
+    Write-Host "=====================================" -ForegroundColor Cyan
+    Write-Host "Dry Run Summary" -ForegroundColor Cyan
+    Write-Host "=====================================" -ForegroundColor Cyan
+    Write-Host "[=] Already installed: $present" -ForegroundColor Gray
+    Write-Host "[+] Would install:     $missing" -ForegroundColor Green
     Write-Host ""
-    Write-Host "Run without -DryRun to install packages" -ForegroundColor Yellow
+    Write-Host "Detection relies on winget matching an installed program to its" -ForegroundColor DarkGray
+    Write-Host "catalogue. An app installed by hand that it cannot match shows as" -ForegroundColor DarkGray
+    Write-Host "[+]; installing over it is usually harmless, but see MANUAL_INSTALL.md" -ForegroundColor DarkGray
+    Write-Host "for the Office caveat." -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "Run without -DryRun to install them" -ForegroundColor Yellow
     exit 0
 }
 
