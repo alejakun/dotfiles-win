@@ -15,6 +15,9 @@
 # Preview without installing anything (no git and no elevation needed):
 #   $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #
+# Second pass on another account, to pick up per-user packages:
+#   $env:DOTFILES_SKIP_ADMIN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+#
 # What this does:
 #   1. Checks prerequisites (winget)
 #   2. Downloads installation files from GitHub
@@ -72,6 +75,12 @@ function Invoke-DotfilesBootstrap {
     $DryRun = [bool]$env:DOTFILES_DRYRUN
     Remove-Item Env:\DOTFILES_DRYRUN -ErrorAction SilentlyContinue
 
+    # For the second pass on a shared machine: the other account runs the same
+    # line to pick up whatever could only be installed per-user. Consumed on read
+    # for the same reason as above.
+    $SkipAdminCheck = [bool]$env:DOTFILES_SKIP_ADMIN
+    Remove-Item Env:\DOTFILES_SKIP_ADMIN -ErrorAction SilentlyContinue
+
     if ($InstallProfile -notin $ValidProfiles) {
         Write-Host "[-] Invalid profile: $InstallProfile" -ForegroundColor Red
         Write-Host "Valid profiles: mini, base, plus, pro, max" -ForegroundColor Yellow
@@ -103,12 +112,18 @@ function Invoke-DotfilesBootstrap {
     }
     Write-Success "PowerShell version: $($PSVersionTable.PSVersion)"
 
-    # Check for elevation. A dry run installs nothing, so it only warns.
+    # Check for elevation. A dry run installs nothing and the second pass only
+    # wants the per-user packages, so both of those warn instead of stopping.
     if (Test-Administrator) {
         Write-Success "Running as administrator"
     } elseif ($DryRun) {
         Write-Warn "Not running as administrator"
         Write-Host "  This preview works, but the real install will not." -ForegroundColor Gray
+    } elseif ($SkipAdminCheck) {
+        Write-Warn "Not running as administrator - continuing anyway"
+        Write-Host "  Only packages with a per-user installer can succeed here." -ForegroundColor Gray
+        Write-Host "  Anything already installed machine-wide by another account is" -ForegroundColor Gray
+        Write-Host "  detected and skipped, so this is safe to run as a second pass." -ForegroundColor Gray
     } else {
         Write-Err "Administrator privileges required"
         Write-Host ""
@@ -122,6 +137,10 @@ function Invoke-DotfilesBootstrap {
         Write-Host ""
         $script = if ($InstallProfile -eq "mini") { "bootstrap.ps1" } else { "bootstrap-$InstallProfile.ps1" }
         Write-Host "     iwr -useb $BaseUrl/$script | iex" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "If you are picking up per-user packages on an account that already" -ForegroundColor Gray
+        Write-Host "had this run by an administrator, skip the check instead:" -ForegroundColor Gray
+        Write-Host "     `$env:DOTFILES_SKIP_ADMIN=`"1`"; iwr -useb $BaseUrl/$script | iex" -ForegroundColor Gray
         Write-Host ""
         return
     }
@@ -249,6 +268,9 @@ function Invoke-DotfilesBootstrap {
         )
         if ($DryRun) {
             $psArgs += "-DryRun"
+        }
+        if ($SkipAdminCheck) {
+            $psArgs += "-SkipAdminCheck"
         }
 
         # -File sets $PSScriptRoot for install.ps1, so it finds the package lists
