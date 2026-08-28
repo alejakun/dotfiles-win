@@ -10,11 +10,14 @@
 #   .\install.ps1 -DryRun        # Show what would be installed
 #   .\install.ps1 -ShowCommands  # Display individual winget commands
 #   .\install.ps1 -Help          # Show help message
+#
+# Requires an elevated PowerShell session (Win+X -> Terminal (Admin)).
 
 param(
     [switch]$DryRun,
     [switch]$ShowCommands,
     [switch]$Help,
+    [switch]$SkipAdminCheck,
     [ValidateSet("mini", "base", "plus", "pro", "max")]
     [Alias("Profile")]
     [string]$InstallProfile = "mini"
@@ -39,6 +42,18 @@ function Write-Warn {
 function Write-Err {
     param([string]$Message)
     Write-Host "[-] $Message" -ForegroundColor Red
+}
+
+# Most of these packages install machine-wide, so elevation is not optional
+function Test-Administrator {
+    # $IsWindows only exists on PowerShell 6+; on 5.1 we are always on Windows
+    if ($PSVersionTable.PSVersion.Major -ge 6 -and -not $IsWindows) {
+        return $true
+    }
+
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
 # Profiles form a ladder: each one extends the one before it, so installing
@@ -85,6 +100,7 @@ if ($Help) {
     Write-Host "  .\install.ps1 -DryRun              Preview packages without installing"
     Write-Host "  .\install.ps1 -ShowCommands        Display individual winget commands"
     Write-Host "  .\install.ps1 -Help                Show this help message"
+    Write-Host "  .\install.ps1 -SkipAdminCheck      Run without elevation (most installs fail)"
     Write-Host ""
     Write-Host "PROFILES:" -ForegroundColor Yellow
     Write-Host "  Each profile extends the one before it, so picking a level installs"
@@ -125,6 +141,34 @@ Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host "Windows Applications Installer" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host ""
+
+# Check for elevation before anything else. -DryRun and -ShowCommands install
+# nothing, so they do not need it.
+if (-not $SkipAdminCheck -and -not $DryRun -and -not $ShowCommands) {
+    Write-Step "Checking administrator privileges..."
+
+    if (-not (Test-Administrator)) {
+        Write-Err "Administrator privileges required"
+        Write-Host ""
+        Write-Host "Most packages here - Office, Docker, TeamViewer and others - install" -ForegroundColor Yellow
+        Write-Host "machine-wide and will fail one by one without elevation." -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "Open an elevated shell and run it again:" -ForegroundColor Yellow
+        Write-Host "  1. Press Win+X" -ForegroundColor Gray
+        Write-Host "  2. Choose 'Terminal (Admin)' or 'Windows PowerShell (Admin)'" -ForegroundColor Gray
+        Write-Host "  3. Run:" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "     .\install.ps1 -Profile $InstallProfile" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "To install anyway - only user-scope packages will succeed - use:" -ForegroundColor Gray
+        Write-Host "     .\install.ps1 -Profile $InstallProfile -SkipAdminCheck" -ForegroundColor Gray
+        Write-Host ""
+        exit 1
+    }
+
+    Write-Success "Running as administrator"
+    Write-Host ""
+}
 
 # Check if winget is available
 Write-Step "Checking winget availability..."

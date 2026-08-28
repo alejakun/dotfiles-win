@@ -60,6 +60,18 @@ function Write-Err {
     Write-Host "[-] $Message" -ForegroundColor Red
 }
 
+# Most of these packages install machine-wide, so elevation is not optional
+function Test-Administrator {
+    # $IsWindows only exists on PowerShell 6+; on 5.1 we are always on Windows
+    if ($PSVersionTable.PSVersion.Major -ge 6 -and -not $IsWindows) {
+        return $true
+    }
+
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
 # Header
 Write-Host ""
 Write-Host "=========================================" -ForegroundColor Cyan
@@ -77,6 +89,25 @@ if ($PSVersionTable.PSVersion.Major -lt 5) {
     exit 1
 }
 Write-Success "PowerShell version: $($PSVersionTable.PSVersion)"
+
+# Check for elevation
+if (-not (Test-Administrator)) {
+    Write-Err "Administrator privileges required"
+    Write-Host ""
+    Write-Host "Most packages here - Office, Docker, TeamViewer and others - install" -ForegroundColor Yellow
+    Write-Host "machine-wide and will fail one by one without elevation." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Open an elevated shell and run it again:" -ForegroundColor Yellow
+    Write-Host "  1. Press Win+X" -ForegroundColor Gray
+    Write-Host "  2. Choose 'Terminal (Admin)' or 'Windows PowerShell (Admin)'" -ForegroundColor Gray
+    Write-Host "  3. Paste:" -ForegroundColor Gray
+    Write-Host ""
+    $script = if ($InstallProfile -eq "mini") { "bootstrap.ps1" } else { "bootstrap-$InstallProfile.ps1" }
+    Write-Host "     iwr -useb $BaseUrl/$script | iex" -ForegroundColor Green
+    Write-Host ""
+    exit 1
+}
+Write-Success "Running as administrator"
 
 # Check winget availability
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
