@@ -256,7 +256,21 @@ To install without elevation anyway — only user-scope packages will succeed:
 
 ### "Execution policy" error
 
-**Solution:**
+Windows ships with script execution disabled (`Restricted`) by default.
+
+**The one-liners already handle this.** They are run from memory by `iex`, which
+the policy does not apply to, and they launch `install.ps1` in a child process
+with `-ExecutionPolicy Bypass` — so your own session's policy is never changed.
+
+You only hit this running `.\install.ps1` yourself from a clone. Either run it
+the same way:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -Profile plus
+```
+
+or allow local scripts for your user, which persists:
+
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```

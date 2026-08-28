@@ -218,28 +218,27 @@ function Invoke-DotfilesBootstrap {
     Write-Host ""
 
     try {
-        # Execute install.ps1 in the correct directory
+        # This script is run from memory by iex, which the execution policy does
+        # not apply to. install.ps1 is a file on disk, so it does - and Restricted
+        # is the default on Windows client. Run it in a child process with the
+        # policy bypassed rather than changing the policy of the user's session.
         $installScript = Join-Path $InstallDir "install.ps1"
+        $psExe = if ($PSVersionTable.PSEdition -eq "Core") { "pwsh" } else { "powershell" }
 
-        # Save current location
-        $previousLocation = Get-Location
-
-        try {
-            # Change to install directory
-            Set-Location $InstallDir
-
-            # Execute the script directly
-            if ($DryRun) {
-                & $installScript -InstallProfile $InstallProfile -DryRun
-            } else {
-                & $installScript -InstallProfile $InstallProfile
-            }
-
-            $exitCode = $LASTEXITCODE
-        } finally {
-            # Restore previous location
-            Set-Location $previousLocation
+        $psArgs = @(
+            "-NoProfile"
+            "-ExecutionPolicy", "Bypass"
+            "-File", $installScript
+            "-InstallProfile", $InstallProfile
+        )
+        if ($DryRun) {
+            $psArgs += "-DryRun"
         }
+
+        # -File sets $PSScriptRoot for install.ps1, so it finds the package lists
+        # without needing us to move the user's working directory
+        & $psExe @psArgs
+        $exitCode = $LASTEXITCODE
 
         Write-Host ""
 
