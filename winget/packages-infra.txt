@@ -7,11 +7,10 @@
 # Resource-intensive applications - install only when needed
 
 # Database Tools
-dbeaver.dbeaver
+DBeaver.DBeaver.Community
 
 # Containers & Virtualization
 Docker.DockerDesktop
-VMware.WorkstationPro
 Hashicorp.Vagrant
 
 # Note: Ansible not available via winget

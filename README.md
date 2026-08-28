@@ -66,11 +66,13 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 - Windows Terminal
 - PowerToys
 - Microsoft Teams
-- Krisp.ai (noise cancellation)
 - ShareX (screenshots)
 - VLC Media Player
 - Google Drive Desktop
 - Tailscale (VPN mesh network)
+
+**Note:** Krisp is not available via winget.
+See [MANUAL_INSTALL.md](MANUAL_INSTALL.md).
 
 ### 👨‍💻 DEV
 **Purpose:** Development tools for frequent use
@@ -88,12 +90,12 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 **Purpose:** Infrastructure & virtualization (resource-intensive)
 
 **Includes:**
-- DBeaver (database tool)
+- DBeaver Community Edition (database tool)
 - Docker Desktop
-- VMware Workstation Pro
 - Vagrant
 
-**Note:** Ansible not available via winget. Install via WSL or pip.
+**Note:** Ansible and VMware Workstation Pro are not available via winget.
+See [MANUAL_INSTALL.md](MANUAL_INSTALL.md).
 
 ### 🌐 FULL
 **Purpose:** Everything combined (home + personal + dev + infra)
