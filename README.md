@@ -123,6 +123,20 @@ only installs what is missing:
 .\install.ps1 -Profile plus -DryRun
 ```
 
+Checks each package against winget and marks what is already on the machine, so
+you can see the real impact before installing anything:
+
+```
+  [=] Google.Chrome
+  [+] Zen-Team.Zen-Browser
+  [+] wez.wezterm
+
+  [=] already installed   [+] would be installed
+```
+
+Detection covers apps installed outside winget too, as long as winget can match
+the installed program to its catalogue.
+
 ### Show Individual Commands
 
 ```powershell
