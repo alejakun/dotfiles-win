@@ -14,7 +14,9 @@ Profiles form a ladder — **each one installs every level below it**:
 mini  ->  base  ->  plus  ->  pro  ->  max
 ```
 
-Open **PowerShell** and run the line for the level you want:
+Open **PowerShell as Administrator** (Win+X → *Terminal (Admin)*) and run the line
+for the level you want. The scripts check for elevation and stop with instructions
+if it is missing, rather than letting every install fail one by one:
 
 **mini** (family computers — the essentials):
 ```powershell
@@ -144,6 +146,10 @@ Docker on a machine that has no use for Node or the cloud CLIs.
 - **Windows 10** (version 1809+) or **Windows 11**
 - **winget** (Windows Package Manager) - Pre-installed on Windows 11
 - **PowerShell 5.0+** - Pre-installed on modern Windows
+- **Administrator privileges** - most packages install machine-wide
+
+`-DryRun` and `-ShowCommands` do not install anything, so they run fine without
+elevation.
 
 ### Check if winget is installed
 
@@ -195,11 +201,20 @@ Comment out or delete lines in package files:
 
 ---
 
-### "Access denied"
+### "Administrator privileges required"
+
+The scripts refuse to start without elevation, because packages like Office,
+Docker and TeamViewer install machine-wide and would fail one by one.
 
 **Solution:**
-- Run PowerShell as Administrator
-- Right-click Start → Windows Terminal (Admin)
+- Press Win+X → *Terminal (Admin)* or *Windows PowerShell (Admin)*
+- Run the same command again
+
+To install without elevation anyway — only user-scope packages will succeed:
+
+```powershell
+.\install.ps1 -Profile plus -SkipAdminCheck
+```
 
 ---
 
