@@ -14,18 +14,25 @@ with the rest of the profile.
 
 **If Office is already installed on the machine:**
 
-This is the one package where installing over an existing copy is not a no-op.
-The winget package drives Click-to-Run, so on a machine that already has Office —
-common on family computers that shipped with it preinstalled — it can reconfigure
-the edition or the update channel rather than simply detecting the existing
-install and skipping.
+This is the one package winget cannot recognise on its own. A machine with
+Microsoft 365 reports its suite as an uncorrelated Add/Remove Programs entry —
+`ARP\Machine\X64\O365HomePremRetail - en-us` on a real example — and nothing at
+all under `Microsoft.Office`. Left to winget, the installer would treat the
+machine as bare and run Click-to-Run over the existing suite, which can change
+its edition, update channel or language.
 
-`winget list --id Microsoft.Office --exact` tells you whether winget already sees
-it, and `.\install.ps1 -Profile mini -DryRun` shows it as `[=]` if so. If winget
-cannot match it, comment the `Microsoft.Office` line out of
-`winget/packages-mini.txt` before running.
+`install.ps1` therefore does not ask winget about this one. It looks for Word or
+Excel directly, through the App Paths registry keys that Click-to-Run, MSI and
+retail installs all write, plus the Click-to-Run configuration key. If any of
+them is there, Office is reported as already installed and skipped.
 
-**What still needs you:**
+You should not have to do anything. To confirm what the machine has:
+
+```powershell
+winget list | Select-String -Pattern '365|Word|Excel|PowerPoint'
+```
+
+**What still needs you:****What still needs you:**
 - Activation happens on **first launch**, not at install time. Open any Office app
   and sign in with the Microsoft account that holds the licence.
 - Without a Microsoft 365 subscription or a standalone licence, the apps install

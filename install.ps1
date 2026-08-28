@@ -56,6 +56,37 @@ function Test-Administrator {
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
+# winget decides whether something is installed by matching it to its catalogue,
+# and for a few packages that match never happens. Office is the one that matters:
+# a machine with Microsoft 365 reports nothing under Microsoft.Office, so winget
+# would install Click-to-Run over the existing suite and reconfigure it. These
+# packages get their own presence test instead.
+$PresenceOverrides = @{
+    "Microsoft.Office" = {
+        # App Paths is written by Click-to-Run, MSI and retail installs alike;
+        # the WOW6432Node copy covers 32-bit Office on 64-bit Windows
+        (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\winword.exe") -or
+        (Test-Path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\winword.exe") -or
+        (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\excel.exe") -or
+        (Test-Path "HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration")
+    }
+}
+
+# Single source of truth for "is this already here", used by both the preview and
+# the installer so they can never disagree
+function Test-PackageInstalled {
+    param([string]$PackageId)
+
+    if ($PresenceOverrides.ContainsKey($PackageId)) {
+        return [bool](& $PresenceOverrides[$PackageId])
+    }
+
+    # --accept-source-agreements matters: without it winget can stop to ask, and
+    # with the output redirected the prompt is invisible - it just looks hung
+    winget list --id $PackageId --exact --accept-source-agreements 2>&1 | Out-Null
+    return $LASTEXITCODE -eq 0
+}
+
 # Profiles form a ladder: each one extends the one before it, so installing
 # "plus" installs mini + base + plus. The chain is the install order too.
 $ProfileLadder = @("mini", "base", "plus", "pro", "max")
@@ -249,12 +280,7 @@ if ($DryRun) {
     foreach ($package in $packages) {
         $index++
 
-        # --accept-source-agreements matters: without it winget can stop to ask,
-        # and with the output redirected the prompt is invisible - the script just
-        # appears to hang. Same check the installer uses, so the preview matches.
-        winget list --id $package --exact --accept-source-agreements 2>&1 | Out-Null
-
-        if ($LASTEXITCODE -eq 0) {
+        if (Test-PackageInstalled -PackageId $package) {
             Write-Host ("  [{0,2}/{1}] [=] {2}" -f $index, $packages.Count, $package) -ForegroundColor Gray
             $present++
         } else {
@@ -302,11 +328,7 @@ $failedPackages = @()
 foreach ($package in $packages) {
     Write-Host "[>] Processing: $package" -ForegroundColor Yellow
 
-    # Check if already installed (fast check)
-    $checkResult = winget list --id $package --exact --accept-source-agreements 2>&1
-    $isInstalled = $LASTEXITCODE -eq 0
-
-    if ($isInstalled) {
+    if (Test-PackageInstalled -PackageId $package) {
         Write-Host "  [=] Already installed: $package" -ForegroundColor Gray
         $skipped++
     } else {
