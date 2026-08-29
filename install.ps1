@@ -327,6 +327,7 @@ $failed = 0
 $skipped = 0
 $failedPackages = @()
 $userScopedPackages = @()
+$needsElevationPackages = @()
 
 # Several packages ship both a machine-wide and a per-user installer, and winget
 # picks. If it picks per-user, the package lands only in the profile running this
@@ -375,15 +376,24 @@ foreach ($package in $packages) {
                 }
                 $installed++
             } else {
-                Write-Warn "  Failed: $package"
-                Write-Host "  Error details:" -ForegroundColor Gray
-                $installResult | ForEach-Object {
-                    if ($_ -and $_ -notmatch '^\s*$') {
-                        Write-Host "    $_" -ForegroundColor DarkGray
+                if (-not $preferMachineScope) {
+                    # Unelevated, winget was already free to use a per-user
+                    # installer. That it could not means there is none, which is a
+                    # category rather than a fault - report it quietly and in one
+                    # place at the end.
+                    Write-Host "  [~] Needs elevation: $package" -ForegroundColor DarkGray
+                    $needsElevationPackages += $package
+                } else {
+                    Write-Warn "  Failed: $package"
+                    Write-Host "  Error details:" -ForegroundColor Gray
+                    $installResult | ForEach-Object {
+                        if ($_ -and $_ -notmatch '^\s*$') {
+                            Write-Host "    $_" -ForegroundColor DarkGray
+                        }
                     }
+                    $failed++
+                    $failedPackages += $package
                 }
-                $failed++
-                $failedPackages += $package
             }
         } catch {
             Write-Warn "  Error installing: $package"
@@ -401,10 +411,25 @@ Write-Host ""
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host "Installation Summary" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
-Write-Host "[+] Installed:        $installed" -ForegroundColor Green
+Write-Host "[+] Installed:         $installed" -ForegroundColor Green
 Write-Host "[=] Already installed: $skipped" -ForegroundColor Gray
-Write-Host "[-] Failed:           $failed" -ForegroundColor Red
+if ($needsElevationPackages.Count -gt 0) {
+    Write-Host "[~] Needs elevation:   $($needsElevationPackages.Count)" -ForegroundColor DarkGray
+}
+Write-Host "[-] Failed:            $failed" -ForegroundColor Red
 Write-Host ""
+
+if ($needsElevationPackages.Count -gt 0) {
+    Write-Host "Not installed - no per-user installer available:" -ForegroundColor DarkGray
+    $needsElevationPackages | ForEach-Object {
+        Write-Host "  - $_" -ForegroundColor DarkGray
+    }
+    Write-Host ""
+    Write-Host "Expected when running without elevation; run again from an elevated" -ForegroundColor DarkGray
+    Write-Host "session to install these. A network or package problem would also" -ForegroundColor DarkGray
+    Write-Host "land here, so check the list if something you needed is on it." -ForegroundColor DarkGray
+    Write-Host ""
+}
 
 if ($userScopedPackages.Count -gt 0) {
     Write-Warn "Installed for the current user only:"
