@@ -185,7 +185,7 @@ function Invoke-DotfilesBootstrap {
     # fetch every list - they are a few hundred bytes each and this keeps those
     # rules in one place.
     $allProfiles = @("mini", "base", "pro")
-    $allGroups = @("extras", "cli", "dev", "cloud", "infra")
+    $allGroups = @("extras", "cli", "dev", "cloud", "infra", "wsl")
 
     # Recreate the repository layout install.ps1 expects
     New-Item -ItemType Directory -Path (Join-Path $InstallDir "winget") -Force | Out-Null

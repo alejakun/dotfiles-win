@@ -104,6 +104,7 @@ asks, and each answer is independent.
 | `dev` | Node.js · Python 3.12 · DBeaver Community | `pro` | no |
 | `cloud` | Google Cloud SDK · AWS CLI | `pro` | no |
 | `infra` | Docker Desktop · Vagrant | `pro` | no |
+| `wsl` | Windows Subsystem for Linux | `pro` | no |
 
 **`extras`** are worth pre-installing on a machine you expect to support, so the
 remote access tools are already there the day you need them — and worth leaving

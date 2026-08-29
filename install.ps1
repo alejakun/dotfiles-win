@@ -96,7 +96,7 @@ $ProfileLadder = @("mini", "base", "pro")
 # what the machine is for, not about how much software it gets, and it does not
 # follow from wanting the cloud CLIs. Each group carries its own metadata, so
 # adding one means adding a file and its name here - no code.
-$OptionalGroupNames = @("extras", "cli", "dev", "cloud", "infra")
+$OptionalGroupNames = @("extras", "cli", "dev", "cloud", "infra", "wsl")
 
 function Get-OptionalGroup {
     param([string]$Name, [string]$ScriptDir)

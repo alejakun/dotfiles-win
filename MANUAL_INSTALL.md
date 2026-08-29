@@ -67,9 +67,9 @@ winget list | Select-String -Pattern '365|Word|Excel|PowerPoint'
 
 **Installation (via WSL):**
 
-1. Enable WSL if you have not already:
+1. Enable WSL. The `wsl` optional group installs the platform for you, or:
    ```powershell
-   wsl --install
+   winget install --id Microsoft.WSL --exact
    ```
 2. Restart, then open the Linux shell and install Ansible:
    ```bash
