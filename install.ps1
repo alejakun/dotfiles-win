@@ -18,6 +18,7 @@ param(
     [switch]$ShowCommands,
     [switch]$Help,
     [switch]$SkipAdminCheck,
+    [switch]$Extras,
     [ValidateSet("mini", "base", "plus", "pro", "max")]
     [Alias("Profile")]
     [string]$InstallProfile = "mini"
@@ -132,6 +133,7 @@ if ($Help) {
     Write-Host "  .\install.ps1 -ShowCommands        Display individual winget commands"
     Write-Host "  .\install.ps1 -Help                Show this help message"
     Write-Host "  .\install.ps1 -SkipAdminCheck      Run without elevation (most installs fail)"
+    Write-Host "  .\install.ps1 -Extras              Include the optional extras without asking"
     Write-Host ""
     Write-Host "PROFILES:" -ForegroundColor Yellow
     Write-Host "  Each profile extends the one before it, so picking a level installs"
@@ -229,6 +231,46 @@ Write-Host "Script directory: $scriptDir" -ForegroundColor Gray
 Write-Host "Profile: $InstallProfile -> $($profilesToInstall -join ' + ')" -ForegroundColor Gray
 
 $packages = @(Get-PackagesFromProfile -PackageType "winget" -ProfileNames $profilesToInstall -ScriptDir $scriptDir)
+
+# Extras are not a rung. They belong on machines you expect to support, which is
+# a question about the machine, not about how much software it gets - so it is
+# asked rather than derived from the profile. The default follows the profile
+# only to make pressing Enter do the right thing for the machine at hand.
+$extrasPackages = @(Get-PackagesFromProfile -PackageType "winget" -ProfileNames @("extras") -ScriptDir $scriptDir)
+
+if ($extrasPackages.Count -gt 0) {
+    $extrasByDefault = $InstallProfile -in @("mini", "base")
+
+    if ($Extras) {
+        $includeExtras = $true
+    } elseif (-not [Environment]::UserInteractive) {
+        $includeExtras = $extrasByDefault
+    } else {
+        Write-Host ""
+        Write-Host "Optional: remote support tools and Earth Pro" -ForegroundColor Yellow
+        $extrasPackages | ForEach-Object {
+            Write-Host "  - $_" -ForegroundColor Gray
+        }
+        Write-Host ""
+        Write-Host "Worth having on a machine you will support or hand to someone else." -ForegroundColor Gray
+        Write-Host "On your own machine they are mostly services running at boot." -ForegroundColor Gray
+
+        $prompt = if ($extrasByDefault) { "Include these? [Y/n]" } else { "Include these? [y/N]" }
+        $answer = Read-Host $prompt
+
+        if ([string]::IsNullOrWhiteSpace($answer)) {
+            $includeExtras = $extrasByDefault
+        } else {
+            $includeExtras = $answer -match '^\s*(y|yes|s|si|sí)\s*$'
+        }
+        Write-Host ""
+    }
+
+    if ($includeExtras) {
+        $packages += $extrasPackages | Where-Object { $_ -notin $packages }
+        Write-Host "Including $($extrasPackages.Count) extra packages" -ForegroundColor Gray
+    }
+}
 $npmPackages = @(Get-PackagesFromProfile -PackageType "npm" -ProfileNames $profilesToInstall -ScriptDir $scriptDir)
 
 if ($packages.Count -eq 0 -and $npmPackages.Count -eq 0) {

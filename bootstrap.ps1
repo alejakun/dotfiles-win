@@ -184,8 +184,9 @@ function Invoke-DotfilesBootstrap {
     Write-Step "Downloading installation files from GitHub..."
 
     # install.ps1 owns the ladder, so just fetch every list - they are a few hundred
-    # bytes each and this keeps that rule in one place.
-    $allProfiles = @("mini", "base", "plus", "pro", "max")
+    # bytes each and this keeps that rule in one place. "extras" is not a rung but
+    # its list is fetched the same way.
+    $allProfiles = @("mini", "base", "plus", "pro", "max", "extras")
 
     # Recreate the repository layout install.ps1 expects
     New-Item -ItemType Directory -Path (Join-Path $InstallDir "winget") -Force | Out-Null

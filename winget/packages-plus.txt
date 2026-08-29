@@ -30,6 +30,7 @@ Microsoft.PowerToys
 Tailscale.Tailscale
 
 # AI & Development Tools
+Anthropic.Claude
 Anthropic.ClaudeCode
 
 # Code Editors

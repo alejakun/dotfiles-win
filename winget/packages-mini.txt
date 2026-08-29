@@ -5,6 +5,10 @@
 #
 # Smallest layer: what a family computer needs to be useful.
 # Every other profile builds on top of this one.
+#
+# Remote access and Earth Pro moved to packages-extras.txt: they belong on
+# machines you support, which is a question about the machine rather than a
+# question about how much software it gets.
 
 # Browsers
 Google.Chrome
@@ -13,15 +17,8 @@ Mozilla.Firefox
 # Viewers
 Adobe.Acrobat.Reader.64-bit
 
-# Geographic Tools
-Google.EarthPro
-
 # Utilities
 7zip.7zip
-
-# Remote Access
-TeamViewer.TeamViewer
-AnyDesk.AnyDesk
 
 # Office Suite (installs unattended, asks to sign in on first launch)
 Microsoft.Office
