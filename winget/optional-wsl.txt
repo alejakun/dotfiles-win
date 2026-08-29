@@ -1,0 +1,22 @@
+# ================================================================================
+# Optional group - Linux on Windows (WSL)
+# ================================================================================
+# Read by install.ps1. The three fields below drive the prompt:
+#
+# Label:   Windows Subsystem for Linux
+# Offer:   pro
+# Default:
+#
+# A real Linux kernel and userland, not a port. This is what Git Bash is not:
+# apt works, ELF binaries run, and tools that assume Unix behave as they do on
+# macOS or a server.
+#
+# It is also the only supported way to run Ansible from Windows - the project
+# does not support Windows as a control node - and the backend Docker Desktop
+# uses. Ansible itself is not a winget package: it is "apt install ansible"
+# inside the distro. See MANUAL_INSTALL.md.
+#
+# This installs the platform only. The distribution is a separate step:
+#   wsl --install -d Ubuntu
+
+Microsoft.WSL
