@@ -15,8 +15,8 @@
 # Preview without installing anything (no git and no elevation needed):
 #   $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #
-# Second pass on another account, to pick up per-user packages:
-#   $env:DOTFILES_SKIP_ADMIN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+# Without elevation it asks whether to continue and install only what does not
+# need it - that is the second pass to run from another account.
 #
 # What this does:
 #   1. Checks prerequisites (winget)
@@ -75,11 +75,8 @@ function Invoke-DotfilesBootstrap {
     $DryRun = [bool]$env:DOTFILES_DRYRUN
     Remove-Item Env:\DOTFILES_DRYRUN -ErrorAction SilentlyContinue
 
-    # For the second pass on a shared machine: the other account runs the same
-    # line to pick up whatever could only be installed per-user. Consumed on read
-    # for the same reason as above.
-    $SkipAdminCheck = [bool]$env:DOTFILES_SKIP_ADMIN
-    Remove-Item Env:\DOTFILES_SKIP_ADMIN -ErrorAction SilentlyContinue
+    # Set only if the user answers the elevation prompt below
+    $SkipAdminCheck = $false
 
     if ($InstallProfile -notin $ValidProfiles) {
         Write-Host "[-] Invalid profile: $InstallProfile" -ForegroundColor Red
@@ -119,30 +116,46 @@ function Invoke-DotfilesBootstrap {
     } elseif ($DryRun) {
         Write-Warn "Not running as administrator"
         Write-Host "  This preview works, but the real install will not." -ForegroundColor Gray
-    } elseif ($SkipAdminCheck) {
-        Write-Warn "Not running as administrator - continuing anyway"
-        Write-Host "  Only packages with a per-user installer can succeed here." -ForegroundColor Gray
-        Write-Host "  Anything already installed machine-wide by another account is" -ForegroundColor Gray
-        Write-Host "  detected and skipped, so this is safe to run as a second pass." -ForegroundColor Gray
     } else {
-        Write-Err "Administrator privileges required"
-        Write-Host ""
-        Write-Host "Most packages here - Office, Docker, TeamViewer and others - install" -ForegroundColor Yellow
-        Write-Host "machine-wide and will fail one by one without elevation." -ForegroundColor Yellow
-        Write-Host ""
-        Write-Host "Open an elevated shell and run it again:" -ForegroundColor Yellow
-        Write-Host "  1. Press Win+X" -ForegroundColor Gray
-        Write-Host "  2. Choose 'Terminal (Admin)' or 'Windows PowerShell (Admin)'" -ForegroundColor Gray
-        Write-Host "  3. Paste:" -ForegroundColor Gray
-        Write-Host ""
         $script = if ($InstallProfile -eq "mini") { "bootstrap.ps1" } else { "bootstrap-$InstallProfile.ps1" }
-        Write-Host "     iwr -useb $BaseUrl/$script | iex" -ForegroundColor Green
+
+        Write-Warn "Not running as administrator"
         Write-Host ""
-        Write-Host "If you are picking up per-user packages on an account that already" -ForegroundColor Gray
-        Write-Host "had this run by an administrator, skip the check instead:" -ForegroundColor Gray
-        Write-Host "     `$env:DOTFILES_SKIP_ADMIN=`"1`"; iwr -useb $BaseUrl/$script | iex" -ForegroundColor Gray
+        Write-Host "Most packages here - Office, TeamViewer, VLC and others - install" -ForegroundColor Yellow
+        Write-Host "machine-wide and cannot be installed from this session." -ForegroundColor Yellow
         Write-Host ""
-        return
+
+        # A Read-Host with nobody there waits forever. We already lost ten minutes
+        # to an invisible winget prompt; do not build a second one.
+        if (-not [Environment]::UserInteractive) {
+            Write-Err "No interactive session to ask in - stopping"
+            Write-Host "Run elevated: iwr -useb $BaseUrl/$script | iex" -ForegroundColor Gray
+            Write-Host ""
+            return
+        }
+
+        Write-Host "You can continue anyway. Anything already installed machine-wide" -ForegroundColor Gray
+        Write-Host "is detected and skipped, and packages that install per-user will" -ForegroundColor Gray
+        Write-Host "work - this is how you finish setting up your own account after" -ForegroundColor Gray
+        Write-Host "an administrator has prepared the machine." -ForegroundColor Gray
+        Write-Host ""
+
+        $answer = Read-Host "Continue without elevation? [y/N]"
+
+        if ($answer -notmatch '^\s*(y|yes|s|si|sí)\s*$') {
+            Write-Host ""
+            Write-Host "Stopped. To run elevated:" -ForegroundColor Yellow
+            Write-Host "  1. Press Win+X" -ForegroundColor Gray
+            Write-Host "  2. Choose 'Terminal (Admin)' or 'Windows PowerShell (Admin)'" -ForegroundColor Gray
+            Write-Host "  3. Paste:" -ForegroundColor Gray
+            Write-Host ""
+            Write-Host "     iwr -useb $BaseUrl/$script | iex" -ForegroundColor Green
+            Write-Host ""
+            return
+        }
+
+        $SkipAdminCheck = $true
+        Write-Host ""
     }
 
     # Check winget availability

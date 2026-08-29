@@ -53,13 +53,6 @@ Needs neither git nor elevation:
 $env:DOTFILES_PROFILE="plus"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 ```
 
-**Second pass on another account.** After an administrator has set the machine up,
-this picks up the packages that only install per-user. No elevation needed, and
-anything already installed machine-wide is detected and skipped:
-```powershell
-$env:DOTFILES_PROFILE="base"; $env:DOTFILES_SKIP_ADMIN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
-```
-
 **Any profile without its own URL**, if you would rather use one address:
 ```powershell
 $env:DOTFILES_PROFILE="pro"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
@@ -70,11 +63,11 @@ $env:DOTFILES_PROFILE="pro"; iwr -useb https://raw.githubusercontent.com/alejaku
 $env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 ```
 
-> `DOTFILES_DRYRUN` and `DOTFILES_SKIP_ADMIN` are consumed when read, so they
-> cannot silently turn a later command in the same window into a preview or an
-> unelevated run. `DOTFILES_PROFILE` and `DOTFILES_BRANCH` persist for the
-> session, so a retry after a network failure does not need them typed again —
-> set them to something else, or open a new window, to change them.
+> `DOTFILES_DRYRUN` is consumed when read, so it cannot silently turn a later
+> command in the same window into another preview. `DOTFILES_PROFILE` and
+> `DOTFILES_BRANCH` persist for the session, so a retry after a network failure
+> does not need them typed again — set them to something else, or open a new
+> window, to change them.
 
 ---
 
@@ -222,17 +215,15 @@ see it.
 A few packages ship no machine-wide installer at all. Those are listed at the end
 of the run under **"Installed for the current user only"**.
 
-To give the other person those, log into their account and run the same line
-again with the elevation check skipped:
+To give the other person those, log into their account and run **the same line
+you ran the first time**. Seeing it is not elevated, the script explains the
+situation and asks whether to continue; answer yes and it installs what does not
+need elevation.
 
-```powershell
-$env:DOTFILES_PROFILE="base"; $env:DOTFILES_SKIP_ADMIN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
-```
-
-No elevation is needed, because a per-user install does not require it. Anything
-already installed machine-wide by the administrator is detected and skipped, so
-the second pass only picks up what is genuinely missing for that account — you do
-not have to know which packages those are.
+Anything the administrator already installed machine-wide is detected and
+skipped, and the packages that need elevation are listed together at the end
+rather than reported as errors. You do not have to know which packages are which,
+and there is only one command to remember.
 
 Do **not** run it from the standard account by elevating with the admin's
 password: Windows then runs the process as the administrator, so per-user
