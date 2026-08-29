@@ -241,8 +241,12 @@ explicitly rather than letting it choose, since a per-user install would land
 only in the installing account's profile and the other user would silently never
 see it.
 
-A few packages ship no machine-wide installer at all. Those are listed at the end
-of the run under **"Installed for the current user only"**.
+Some packages come back listed at the end under **"Installed without machine
+scope"**. That means winget refused the machine-wide install and it went ahead
+without the constraint — which happens both when the package really has no
+machine-wide installer and when its manifest just declares no scope, where the
+install may be machine-wide anyway. `Get-Command <exe> | Select-Object Source`
+settles it: a path under Program Files is machine-wide, one under AppData is not.
 
 To give the other person those, log into their account and run **the same line
 you ran the first time**. Seeing it is not elevated, the script explains the
