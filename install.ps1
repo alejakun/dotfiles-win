@@ -421,6 +421,10 @@ $needsElevationPackages = @()
 # picks. If it picks per-user, the package lands only in the profile running this
 # script - on a machine being handed to someone else, they simply never get it,
 # with nothing in the summary to say so. Ask for machine scope explicitly.
+#
+# A refusal does not prove there is no machine-wide installer: winget also
+# declines when the manifest declares no Scope at all, even for a plain MSI that
+# installs machine-wide regardless. The summary says so rather than guessing.
 # Unelevated there is no point: machine scope would fail every time.
 $preferMachineScope = Test-Administrator
 
@@ -457,7 +461,7 @@ foreach ($package in $packages) {
 
             if ($LASTEXITCODE -eq 0) {
                 if ($fellBackToUser) {
-                    Write-Success "  Installed (current user only): $package"
+                    Write-Success "  Installed (no machine scope): $package"
                     $userScopedPackages += $package
                 } else {
                     Write-Success "  Installed: $package"
@@ -520,15 +524,19 @@ if ($needsElevationPackages.Count -gt 0) {
 }
 
 if ($userScopedPackages.Count -gt 0) {
-    Write-Warn "Installed for the current user only:"
+    Write-Warn "Installed without machine scope:"
     $userScopedPackages | ForEach-Object {
         Write-Host "  - $_" -ForegroundColor Yellow
     }
     Write-Host ""
-    Write-Host "These ship no machine-wide installer, so they live in this account's" -ForegroundColor Gray
-    Write-Host "profile and other users on this machine will not see them. To give" -ForegroundColor Gray
-    Write-Host "someone else access, run the install again from their session - no" -ForegroundColor Gray
-    Write-Host "elevation needed, since a per-user install does not require it." -ForegroundColor Gray
+    Write-Host "winget refused a machine-wide install for these, so they were installed" -ForegroundColor Gray
+    Write-Host "without that constraint. Two different causes look identical here: the" -ForegroundColor Gray
+    Write-Host "package genuinely has no machine-wide installer, or its manifest simply" -ForegroundColor Gray
+    Write-Host "declares no scope - in which case it may be machine-wide anyway." -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "To tell them apart:  Get-Command <exe> | Select-Object Source" -ForegroundColor Gray
+    Write-Host "A path under Program Files is machine-wide; one under AppData is not," -ForegroundColor Gray
+    Write-Host "and other accounts on this machine will not see it." -ForegroundColor Gray
     Write-Host ""
 }
 
