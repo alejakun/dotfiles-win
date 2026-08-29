@@ -6,7 +6,7 @@
 #
 # Usage:
 #   .\install.ps1                # Install the mini profile (default)
-#   .\install.ps1 -Profile plus  # Each profile includes the ones below it
+#   .\install.ps1 -Profile pro   # Each profile includes the ones below it
 #   .\install.ps1 -DryRun        # Show what would be installed
 #   .\install.ps1 -ShowCommands  # Display individual winget commands
 #   .\install.ps1 -Help          # Show help message
@@ -18,8 +18,8 @@ param(
     [switch]$ShowCommands,
     [switch]$Help,
     [switch]$SkipAdminCheck,
-    [switch]$Extras,
-    [ValidateSet("mini", "base", "plus", "pro", "max")]
+    [string[]]$Optional = @(),
+    [ValidateSet("mini", "base", "pro")]
     [Alias("Profile")]
     [string]$InstallProfile = "mini"
 )
@@ -89,8 +89,40 @@ function Test-PackageInstalled {
 }
 
 # Profiles form a ladder: each one extends the one before it, so installing
-# "plus" installs mini + base + plus. The chain is the install order too.
-$ProfileLadder = @("mini", "base", "plus", "pro", "max")
+# "pro" installs mini + base + pro. The chain is the install order too.
+$ProfileLadder = @("mini", "base", "pro")
+
+# Optional groups are not rungs. Whether you want containers is a question about
+# what the machine is for, not about how much software it gets, and it does not
+# follow from wanting the cloud CLIs. Each group carries its own metadata, so
+# adding one means adding a file and its name here - no code.
+$OptionalGroupNames = @("extras", "dev", "cloud", "infra")
+
+function Get-OptionalGroup {
+    param([string]$Name, [string]$ScriptDir)
+
+    $file = Join-Path $ScriptDir "winget\optional-$Name.txt"
+    if (-not (Test-Path $file)) { return $null }
+
+    $lines = Get-Content $file
+    $group = @{
+        Name    = $Name
+        Label   = $Name
+        Offer   = $ProfileLadder[0]
+        Default = @()
+    }
+
+    foreach ($line in $lines) {
+        if ($line -match '^\s*#\s*Label:\s*(.+)$')   { $group.Label = $Matches[1].Trim() }
+        if ($line -match '^\s*#\s*Offer:\s*(.+)$')   { $group.Offer = $Matches[1].Trim() }
+        if ($line -match '^\s*#\s*Default:\s*(.*)$') {
+            $group.Default = @($Matches[1] -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+        }
+    }
+
+    $group.Packages = @($lines | Where-Object { $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$' })
+    return $group
+}
 
 # Helper function to read packages from profile files
 function Get-PackagesFromProfile {
@@ -103,7 +135,8 @@ function Get-PackagesFromProfile {
     $allPackages = @()
 
     foreach ($prof in $ProfileNames) {
-        $packageFile = Join-Path $ScriptDir "$PackageType\packages-$prof.txt"
+        $file = if ($prof -like "optional-*") { "$prof.txt" } else { "packages-$prof.txt" }
+        $packageFile = Join-Path $ScriptDir "$PackageType\$file"
 
         if (Test-Path $packageFile) {
             $allPackages += Get-Content $packageFile | Where-Object {
@@ -126,44 +159,49 @@ if ($Help) {
     Write-Host "  .\install.ps1                      Install mini profile (default)"
     Write-Host "  .\install.ps1 -Profile mini        Family computers"
     Write-Host "  .\install.ps1 -Profile base        + passwords, calls, media"
-    Write-Host "  .\install.ps1 -Profile plus        + browsers, editors, terminals"
-    Write-Host "  .\install.ps1 -Profile pro         + runtimes, cloud CLIs, databases"
-    Write-Host "  .\install.ps1 -Profile max         + containers and virtualization"
+    Write-Host "  .\install.ps1 -Profile pro         + browsers, editors, terminals"
     Write-Host "  .\install.ps1 -DryRun              Preview packages without installing"
     Write-Host "  .\install.ps1 -ShowCommands        Display individual winget commands"
     Write-Host "  .\install.ps1 -Help                Show this help message"
     Write-Host "  .\install.ps1 -SkipAdminCheck      Run without elevation (most installs fail)"
-    Write-Host "  .\install.ps1 -Extras              Include the optional extras without asking"
+    Write-Host "  .\install.ps1 -Optional dev,cloud  Include optional groups without asking"
     Write-Host ""
     Write-Host "PROFILES:" -ForegroundColor Yellow
     Write-Host "  Each profile extends the one before it, so picking a level installs"
     Write-Host "  every level below it as well:"
     Write-Host ""
-    Write-Host "    mini -> base -> plus -> pro -> max"
+    Write-Host "    mini -> base -> pro"
     Write-Host ""
     Write-Host "  mini - Family computers (DEFAULT). Browsers, Office, Reader,"
     Write-Host "         Earth Pro, 7-Zip, TeamViewer, AnyDesk"
     Write-Host "  base - + Bitwarden, Rambox, Zoom, Doxie, QuickLook, ShareX, VLC"
-    Write-Host "  plus - + Dropbox, Brave, Zen, Git, VSCode, terminals, Tailscale,"
-    Write-Host "         Claude Code, Sublime Text, Spark"
-    Write-Host "  pro  - + Node.js, Python, gcloud, AWS CLI, DBeaver"
-    Write-Host "  max  - + Docker Desktop, Vagrant"
+    Write-Host "  pro  - + Dropbox, Brave, Zen, Git, VSCode, terminals, Tailscale,"
+    Write-Host "         Claude, Claude Code, Sublime Text, Spark"
+    Write-Host ""
+    Write-Host "OPTIONAL GROUPS:" -ForegroundColor Yellow
+    Write-Host "  Asked at run time, outside the ladder. Whether you want them is a"
+    Write-Host "  question about the machine, not about how much software it gets:"
+    Write-Host ""
+    Write-Host "  extras - TeamViewer, AnyDesk, Earth Pro (offered everywhere)"
+    Write-Host "  dev    - Node.js, Python, DBeaver (from pro)"
+    Write-Host "  cloud  - Google Cloud SDK, AWS CLI (from pro)"
+    Write-Host "  infra  - Docker Desktop, Vagrant (from pro)"
     Write-Host ""
     Write-Host "EXAMPLES:" -ForegroundColor Yellow
     Write-Host "  # Family computer (default)"
     Write-Host "  .\install.ps1"
     Write-Host ""
     Write-Host "  # Your own machine"
-    Write-Host "  .\install.ps1 -Profile plus"
+    Write-Host "  .\install.ps1 -Profile pro"
     Write-Host ""
-    Write-Host "  # Everything"
-    Write-Host "  .\install.ps1 -Profile max"
+    Write-Host "  # Everything, without being asked"
+    Write-Host "  .\install.ps1 -Profile pro -Optional extras,dev,cloud,infra"
     Write-Host ""
     Write-Host "  # Preview what would be installed"
-    Write-Host "  .\install.ps1 -Profile plus -DryRun"
+    Write-Host "  .\install.ps1 -Profile pro -DryRun"
     Write-Host ""
     Write-Host "  # See individual commands to copy/paste"
-    Write-Host "  .\install.ps1 -ShowCommands -Profile max"
+    Write-Host "  .\install.ps1 -ShowCommands -Profile pro"
     Write-Host ""
     exit 0
 }
@@ -232,50 +270,58 @@ Write-Host "Profile: $InstallProfile -> $($profilesToInstall -join ' + ')" -Fore
 
 $packages = @(Get-PackagesFromProfile -PackageType "winget" -ProfileNames $profilesToInstall -ScriptDir $scriptDir)
 
-# Extras are not a rung. They belong on machines you expect to support, which is
-# a question about the machine, not about how much software it gets - so it is
-# asked rather than derived from the profile. The default follows the profile
-# only to make pressing Enter do the right thing for the machine at hand.
-$extrasPackages = @(Get-PackagesFromProfile -PackageType "winget" -ProfileNames @("extras") -ScriptDir $scriptDir)
+# Ask about each optional group that applies to this profile. Offered from its
+# own rung upward; the default is yes only on the profiles the group names, so
+# pressing Enter never installs something you did not ask for on a machine where
+# it does not belong.
+$profileIndex = $ProfileLadder.IndexOf($InstallProfile)
 
-if ($extrasPackages.Count -gt 0) {
-    $extrasByDefault = $InstallProfile -in @("mini", "base")
+foreach ($name in $OptionalGroupNames) {
+    $group = Get-OptionalGroup -Name $name -ScriptDir $scriptDir
 
-    if ($Extras) {
-        $includeExtras = $true
+    if (-not $group -or $group.Packages.Count -eq 0) { continue }
+    if ($profileIndex -lt $ProfileLadder.IndexOf($group.Offer)) { continue }
+
+    $byDefault = $InstallProfile -in $group.Default
+
+    if ($name -in $Optional) {
+        $include = $true
     } elseif (-not [Environment]::UserInteractive) {
-        $includeExtras = $extrasByDefault
+        $include = $byDefault
     } else {
         Write-Host ""
-        Write-Host "Optional: remote support tools and Earth Pro" -ForegroundColor Yellow
-        $extrasPackages | ForEach-Object {
+        Write-Host "Optional: $($group.Label)" -ForegroundColor Yellow
+        $group.Packages | ForEach-Object {
             Write-Host "  - $_" -ForegroundColor Gray
         }
-        Write-Host ""
-        Write-Host "Worth having on a machine you will support or hand to someone else." -ForegroundColor Gray
-        Write-Host "On your own machine they are mostly services running at boot." -ForegroundColor Gray
 
-        $prompt = if ($extrasByDefault) { "Include these? [Y/n]" } else { "Include these? [y/N]" }
+        $prompt = if ($byDefault) { "Include these? [Y/n]" } else { "Include these? [y/N]" }
         $answer = Read-Host $prompt
 
         if ([string]::IsNullOrWhiteSpace($answer)) {
-            $includeExtras = $extrasByDefault
+            $include = $byDefault
         } else {
-            $includeExtras = $answer -match '^\s*(y|yes|s|si|sí)\s*$'
+            $include = $answer -match '^\s*(y|yes|s|si|sí)\s*$'
         }
-        Write-Host ""
     }
 
-    if ($includeExtras) {
-        $packages += $extrasPackages | Where-Object { $_ -notin $packages }
-        Write-Host "Including $($extrasPackages.Count) extra packages" -ForegroundColor Gray
+    if ($include) {
+        $packages += $group.Packages | Where-Object { $_ -notin $packages }
+
+        # A group may bring npm packages too - they are only useful if whatever
+        # provides npm came with the same group
+        $groupNpm = @(Get-PackagesFromProfile -PackageType "npm" -ProfileNames @("optional-$name") -ScriptDir $scriptDir)
+        $npmPackages += $groupNpm | Where-Object { $_ -notin $npmPackages }
+
+        Write-Host "  Including $($group.Packages.Count) packages from '$name'" -ForegroundColor Gray
     }
 }
-$npmPackages = @(Get-PackagesFromProfile -PackageType "npm" -ProfileNames $profilesToInstall -ScriptDir $scriptDir)
+
+Write-Host ""
 
 if ($packages.Count -eq 0 -and $npmPackages.Count -eq 0) {
     Write-Err "No packages found for profiles: $($profilesToInstall -join ', ')"
-    Write-Host "Available profiles: mini, base, plus, pro, max" -ForegroundColor Yellow
+    Write-Host "Available profiles: mini, base, pro" -ForegroundColor Yellow
     exit 1
 }
 

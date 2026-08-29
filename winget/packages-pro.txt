@@ -3,16 +3,42 @@
 # ================================================================================
 # Install via: winget install --id <PackageId>
 #
-# For machines that work with infrastructure: runtimes, cloud CLIs, databases.
-# Installing this profile also installs mini, base and plus.
+# The daily driver: your own machine, with editors and terminals.
+# Installing this profile also installs mini and base.
+#
+# Runtimes, cloud CLIs and containers are not here - they are optional groups
+# the script asks about, because wanting Docker does not follow from wanting
+# gcloud. See winget/optional-*.txt.
 
-# Runtimes
-OpenJS.NodeJS
-Python.Python.3.12
+# Cloud Storage
+Dropbox.Dropbox
 
-# Cloud CLI Tools
-Google.CloudSDK
-Amazon.AWSCLI
+# Browsers
+Brave.Brave
+Zen-Team.Zen-Browser
 
-# Database Tools
-DBeaver.DBeaver.Community
+# Essential Tools
+Git.Git
+GitHub.cli
+Microsoft.VisualStudioCode
+
+# Terminals
+Microsoft.WindowsTerminal
+wez.wezterm
+raphamorim.rio
+
+# Windows Productivity
+Microsoft.PowerToys
+
+# Network & VPN
+Tailscale.Tailscale
+
+# AI & Development Tools
+Anthropic.Claude
+Anthropic.ClaudeCode
+
+# Code Editors
+SublimeHQ.SublimeText.4
+
+# Mail
+Readdle.Spark

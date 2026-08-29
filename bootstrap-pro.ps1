@@ -2,7 +2,7 @@
 # ================================================================================
 # dotfiles-win Bootstrap - Pro Profile
 # ================================================================================
-# Installs: MINI + BASE + PLUS + PRO
+# Installs: MINI + BASE + PRO
 # Usage: iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-pro.ps1 | iex
 
 $env:DOTFILES_PROFILE="pro"

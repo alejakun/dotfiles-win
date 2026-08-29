@@ -11,14 +11,14 @@
 Profiles form a ladder — **each one installs every level below it**:
 
 ```
-mini  ->  base  ->  plus  ->  pro  ->  max
+mini  ->  base  ->  pro
 ```
 
 Open **PowerShell as Administrator** (Win+X → *Terminal (Admin)*) and run the line
 for the level you want. The scripts check for elevation and stop with instructions
 if it is missing, rather than letting every install fail one by one:
 
-**mini** (family computers — the essentials):
+**mini** (a machine for someone else — the essentials):
 ```powershell
 iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 ```
@@ -28,20 +28,13 @@ iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstr
 iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-base.ps1 | iex
 ```
 
-**plus** (your own machine — browsers, editors, terminals):
-```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-plus.ps1 | iex
-```
-
-**pro** (adds runtimes, cloud CLIs and databases):
+**pro** (your own machine — browsers, editors, terminals):
 ```powershell
 iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-pro.ps1 | iex
 ```
 
-**max** (adds containers and virtualization):
-```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-max.ps1 | iex
-```
+Each run also **asks** about the optional groups that apply. See
+[Optional groups](#-optional-groups).
 
 ### Other one-liners
 
@@ -50,7 +43,7 @@ Swap the profile name in these for whichever level you want.
 **Preview first — lists what is already installed and what would be added.**
 Needs neither git nor elevation:
 ```powershell
-$env:DOTFILES_PROFILE="plus"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+$env:DOTFILES_PROFILE="pro"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 ```
 
 **Any profile without its own URL**, if you would rather use one address:
@@ -75,52 +68,67 @@ $env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/al
 
 | Profile | Adds | Total | For |
 |---|---|---|---|
-| `mini` | 5 | 5 | Family computers |
-| `base` | +7 | 12 | Everyday use |
-| `plus` | +15 | 27 | Your own machine |
-| `pro` | +5 | 32 | Working with infrastructure |
-| `max` | +2 | 34 | Running infrastructure locally |
-
-Plus **extras** — three optional packages the script asks about at run time,
-outside the ladder. See below.
+| `mini` | 5 | 5 | A machine you hand to someone else |
+| `base` | +7 | 12 | Everyday family use |
+| `pro` | +15 | 27 | Your own machine |
 
 ### 🏠 mini — 5
 Chrome · Firefox · Adobe Acrobat Reader · 7-Zip · Microsoft Office
 
-Office installs unattended and asks you to sign in the first time you open an app.
-
 ### 📦 base — +7
 Bitwarden · Rambox · Zoom · Doxie Scanner · QuickLook · ShareX · VLC
 
-### 💼 plus — +15
+### 💼 pro — +15
 Dropbox · Brave · Zen Browser · Git · GitHub CLI · VSCode · Windows Terminal ·
 WezTerm · Rio · PowerToys · Tailscale · Claude · Claude Code · Sublime Text 4 ·
 Spark
 
-### 👨‍💻 pro — +5
-Node.js · Python 3.12 · Google Cloud SDK · AWS CLI · DBeaver Community
+---
 
-Read `pro` as *you work with infrastructure* and `max` as *you also run it
-locally* — which is why one extends the other.
+## 🧰 Optional groups
 
-### 🏗️ max — +2
-Docker Desktop · Vagrant
+Runtimes, cloud CLIs and containers are **not** rungs. Whether you want them is a
+question about what the machine is *for*, not about how much software it gets —
+and wanting Docker does not follow from wanting the cloud CLIs. So the script
+asks, and each answer is independent.
 
-### 🧰 extras — 3, optional
-TeamViewer · AnyDesk · Google Earth Pro
+| Group | Packages | Offered from | Default |
+|---|---|---|---|
+| `extras` | TeamViewer · AnyDesk · Google Earth Pro | `mini` | **yes** on mini and base |
+| `dev` | Node.js · Python 3.12 · DBeaver Community | `pro` | no |
+| `cloud` | Google Cloud SDK · AWS CLI | `pro` | no |
+| `infra` | Docker Desktop · Vagrant | `pro` | no |
 
-These are not a rung. Whether you want them is a question about the **machine**,
-not about how much software it gets: they are worth pre-installing on a computer
-you expect to support or hand to someone else, so the tools are already there the
-day you need them — and worth leaving off your own machine, where the remote
-access agents are just services running at boot.
+**`extras`** are worth pre-installing on a machine you expect to support, so the
+remote access tools are already there the day you need them — and worth leaving
+off your own machine, where they are services running at boot for nothing.
 
-So the script asks. Pressing Enter accepts the default, which is **yes** on `mini`
-and `base` and **no** on `plus`, `pro` and `max`. `-Extras` includes them without
-asking, and with no interactive session the default is used silently.
+Everything else defaults to **no** on purpose: undoing an unwanted install costs
+more than running again when you notice something missing. A second run skips
+whatever is already there.
 
-**Note:** Ansible is not available via winget and does not support Windows as a
-control node. See [MANUAL_INSTALL.md](MANUAL_INSTALL.md) for the WSL route.
+To answer in advance, or from a script:
+
+```powershell
+.\install.ps1 -Profile pro -Optional dev,cloud
+```
+
+With no interactive session the defaults are applied silently rather than
+blocking on a prompt nobody can see.
+
+### Adding a group
+
+Drop a `winget/optional-<name>.txt` file with this header and add `<name>` to
+`$OptionalGroupNames` in `install.ps1` and `$allGroups` in `bootstrap.ps1`:
+
+```
+# Label:   What the prompt calls it
+# Offer:   pro
+# Default:
+```
+
+`Offer` is the lowest rung it appears from; `Default` lists the profiles where the
+answer defaults to yes. No other code changes.
 
 ---
 
@@ -132,7 +140,7 @@ See [Quick Start](#-quick-start) above.
 
 ### Method 2: Manual Clone
 
-Needs git, which this repo installs in `plus` — so on a fresh machine use the
+Needs git, which this repo installs in `pro` — so on a fresh machine use the
 one-liner, or grab the zip:
 
 ```powershell
@@ -146,7 +154,7 @@ With git available:
 ```powershell
 git clone https://github.com/alejakun/dotfiles-win.git
 cd dotfiles-win
-.\install.ps1 -Profile plus
+.\install.ps1 -Profile pro
 ```
 
 ### Method 3: Picking a Level
@@ -154,16 +162,14 @@ cd dotfiles-win
 Each profile includes the ones below it, so a single command is always enough:
 
 ```powershell
-.\install.ps1 -Profile plus    # mini + base + plus
-.\install.ps1 -Profile max     # everything
+.\install.ps1 -Profile pro     # mini + base + pro
 ```
 
 Packages already installed are detected and skipped, so moving up a level later
 only installs what is missing:
 
 ```powershell
-.\install.ps1 -Profile plus    # today
-.\install.ps1 -Profile pro     # later, adds only the pro layer
+.\install.ps1 -Profile pro     # mini + base + pro
 ```
 
 ---
@@ -175,7 +181,7 @@ only installs what is missing:
 Needs neither git nor elevation, so it works on a machine straight out of the box:
 
 ```powershell
-$env:DOTFILES_PROFILE="plus"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+$env:DOTFILES_PROFILE="pro"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 ```
 
 `DOTFILES_DRYRUN` is consumed on read, so the next run in the same terminal
@@ -184,7 +190,7 @@ installs for real rather than silently previewing again.
 From a cloned repo:
 
 ```powershell
-.\install.ps1 -Profile plus -DryRun
+.\install.ps1 -Profile pro -DryRun
 ```
 
 Checks each package against winget and marks what is already on the machine, so
@@ -204,7 +210,7 @@ the installed program to its catalogue.
 ### Show Individual Commands
 
 ```powershell
-.\install.ps1 -Profile max -ShowCommands
+.\install.ps1 -Profile pro -ShowCommands
 ```
 
 This displays individual `winget install` commands you can copy/paste. It is also
@@ -278,7 +284,7 @@ If not installed, get it from [Microsoft Store](https://www.microsoft.com/p/app-
    ```
 
 2. Add to the profile file for the lowest level that should get it
-   (`winget/packages-mini.txt`, `packages-plus.txt`, etc.):
+   (`winget/packages-mini.txt`, `packages-pro.txt`, etc.):
    ```txt
    # My additions
    Notepad++.Notepad++
@@ -320,7 +326,7 @@ Docker and TeamViewer install machine-wide and would fail one by one.
 To install without elevation anyway — only user-scope packages will succeed:
 
 ```powershell
-.\install.ps1 -Profile plus -SkipAdminCheck
+.\install.ps1 -Profile pro -SkipAdminCheck
 ```
 
 ---
@@ -337,7 +343,7 @@ You only hit this running `.\install.ps1` yourself from a clone. Either run it
 the same way:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1 -Profile plus
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -Profile pro
 ```
 
 or allow local scripts for your user, which persists:
@@ -398,18 +404,18 @@ aws --version
 dotfiles-win/
 ├── bootstrap.ps1                 # Remote installer + mini one-liner
 ├── bootstrap-base.ps1            # One-liner: base
-├── bootstrap-plus.ps1            # One-liner: plus
 ├── bootstrap-pro.ps1             # One-liner: pro
-├── bootstrap-max.ps1             # One-liner: max
 ├── install.ps1                   # Main installation script
 ├── winget/
-│   ├── packages-mini.txt         # Each file holds only its own layer;
-│   ├── packages-base.txt         # install.ps1 walks the ladder and
-│   ├── packages-plus.txt         # merges every level below the one
-│   ├── packages-pro.txt          # you asked for
-│   └── packages-max.txt
+│   ├── packages-mini.txt         # The ladder. Each file holds only its own
+│   ├── packages-base.txt         # layer; install.ps1 merges every level
+│   ├── packages-pro.txt          # below the one you asked for
+│   ├── optional-extras.txt       # Optional groups, asked at run time.
+│   ├── optional-dev.txt          # Metadata in each file header decides
+│   ├── optional-cloud.txt        # where it is offered and its default
+│   └── optional-infra.txt
 ├── npm/
-│   └── packages-pro.txt          # Global npm packages (needs Node.js, in pro)
+│   └── optional-dev.txt          # Global npm packages, tied to the dev group
 ├── MANUAL_INSTALL.md             # Manual installation guide
 └── README.md                     # This file
 ```

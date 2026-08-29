@@ -5,12 +5,10 @@
 # One-line installation (mini profile - default):
 #   iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #
-# Install a specific profile. Each one extends the ones below it, so "plus"
-# installs mini + base + plus:
+# Install a specific profile. Each one extends the ones below it, so "pro"
+# installs mini + base + pro:
 #   $env:DOTFILES_PROFILE="base"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
-#   $env:DOTFILES_PROFILE="plus"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #   $env:DOTFILES_PROFILE="pro"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
-#   $env:DOTFILES_PROFILE="max"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
 #
 # Preview without installing anything (no git and no elevation needed):
 #   $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
@@ -68,7 +66,7 @@ function Test-Administrator {
 function Invoke-DotfilesBootstrap {
     # Read the profile from the environment variable or use the smallest one
     $InstallProfile = if ($env:DOTFILES_PROFILE) { $env:DOTFILES_PROFILE.Trim() } else { "mini" }
-    $ValidProfiles = @("mini", "base", "plus", "pro", "max")
+    $ValidProfiles = @("mini", "base", "pro")
 
     # Preview only. Consumed immediately: left set, the next real run in this same
     # terminal would silently install nothing.
@@ -80,7 +78,7 @@ function Invoke-DotfilesBootstrap {
 
     if ($InstallProfile -notin $ValidProfiles) {
         Write-Host "[-] Invalid profile: $InstallProfile" -ForegroundColor Red
-        Write-Host "Valid profiles: mini, base, plus, pro, max" -ForegroundColor Yellow
+        Write-Host "Valid profiles: mini, base, pro" -ForegroundColor Yellow
         return
     }
 
@@ -183,10 +181,11 @@ function Invoke-DotfilesBootstrap {
     # Download installation files
     Write-Step "Downloading installation files from GitHub..."
 
-    # install.ps1 owns the ladder, so just fetch every list - they are a few hundred
-    # bytes each and this keeps that rule in one place. "extras" is not a rung but
-    # its list is fetched the same way.
-    $allProfiles = @("mini", "base", "plus", "pro", "max", "extras")
+    # install.ps1 owns the ladder and decides which optional groups apply, so just
+    # fetch every list - they are a few hundred bytes each and this keeps those
+    # rules in one place.
+    $allProfiles = @("mini", "base", "pro")
+    $allGroups = @("extras", "dev", "cloud", "infra")
 
     # Recreate the repository layout install.ps1 expects
     New-Item -ItemType Directory -Path (Join-Path $InstallDir "winget") -Force | Out-Null
@@ -213,6 +212,19 @@ function Invoke-DotfilesBootstrap {
             Url = "$BaseUrl/npm/packages-$prof.txt"
             Path = Join-Path $InstallDir "npm\packages-$prof.txt"
             Name = "npm/packages-$prof.txt"
+        }
+    }
+
+    foreach ($grp in $allGroups) {
+        $files += @{
+            Url = "$BaseUrl/winget/optional-$grp.txt"
+            Path = Join-Path $InstallDir "winget\optional-$grp.txt"
+            Name = "winget/optional-$grp.txt"
+        }
+        $files += @{
+            Url = "$BaseUrl/npm/optional-$grp.txt"
+            Path = Join-Path $InstallDir "npm\optional-$grp.txt"
+            Name = "npm/optional-$grp.txt"
         }
     }
 
