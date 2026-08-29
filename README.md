@@ -75,24 +75,27 @@ $env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/al
 
 | Profile | Adds | Total | For |
 |---|---|---|---|
-| `mini` | 8 | 8 | Family computers |
-| `base` | +7 | 15 | Everyday use |
-| `plus` | +14 | 29 | Your own machine |
-| `pro` | +5 | 34 | Working with infrastructure |
-| `max` | +2 | 36 | Running infrastructure locally |
+| `mini` | 5 | 5 | Family computers |
+| `base` | +7 | 12 | Everyday use |
+| `plus` | +15 | 27 | Your own machine |
+| `pro` | +5 | 32 | Working with infrastructure |
+| `max` | +2 | 34 | Running infrastructure locally |
 
-### 🏠 mini — 8
-Browsers (Chrome, Firefox) · Adobe Acrobat Reader · Google Earth Pro · 7-Zip ·
-TeamViewer · AnyDesk · Microsoft Office
+Plus **extras** — three optional packages the script asks about at run time,
+outside the ladder. See below.
+
+### 🏠 mini — 5
+Chrome · Firefox · Adobe Acrobat Reader · 7-Zip · Microsoft Office
 
 Office installs unattended and asks you to sign in the first time you open an app.
 
 ### 📦 base — +7
 Bitwarden · Rambox · Zoom · Doxie Scanner · QuickLook · ShareX · VLC
 
-### 💼 plus — +14
+### 💼 plus — +15
 Dropbox · Brave · Zen Browser · Git · GitHub CLI · VSCode · Windows Terminal ·
-WezTerm · Rio · PowerToys · Tailscale · Claude Code · Sublime Text 4 · Spark
+WezTerm · Rio · PowerToys · Tailscale · Claude · Claude Code · Sublime Text 4 ·
+Spark
 
 ### 👨‍💻 pro — +5
 Node.js · Python 3.12 · Google Cloud SDK · AWS CLI · DBeaver Community
@@ -102,6 +105,19 @@ locally* — which is why one extends the other.
 
 ### 🏗️ max — +2
 Docker Desktop · Vagrant
+
+### 🧰 extras — 3, optional
+TeamViewer · AnyDesk · Google Earth Pro
+
+These are not a rung. Whether you want them is a question about the **machine**,
+not about how much software it gets: they are worth pre-installing on a computer
+you expect to support or hand to someone else, so the tools are already there the
+day you need them — and worth leaving off your own machine, where the remote
+access agents are just services running at boot.
+
+So the script asks. Pressing Enter accepts the default, which is **yes** on `mini`
+and `base` and **no** on `plus`, `pro` and `max`. `-Extras` includes them without
+asking, and with no interactive session the default is used silently.
 
 **Note:** Ansible is not available via winget and does not support Windows as a
 control node. See [MANUAL_INSTALL.md](MANUAL_INSTALL.md) for the WSL route.
