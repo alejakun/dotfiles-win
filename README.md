@@ -70,7 +70,7 @@ $env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/al
 |---|---|---|---|
 | `mini` | 5 | 5 | A machine you hand to someone else |
 | `base` | +7 | 12 | Everyday family use |
-| `pro` | +15 | 27 | Your own machine |
+| `pro` | +18 | 30 | Your own machine |
 
 ### 🏠 mini — 5
 Chrome · Firefox · Adobe Acrobat Reader · 7-Zip · Microsoft Office
@@ -78,10 +78,15 @@ Chrome · Firefox · Adobe Acrobat Reader · 7-Zip · Microsoft Office
 ### 📦 base — +7
 Bitwarden · Rambox · Zoom · Doxie Scanner · QuickLook · ShareX · VLC
 
-### 💼 pro — +15
+### 💼 pro — +18
 Dropbox · Brave · Zen Browser · Git · GitHub CLI · VSCode · Windows Terminal ·
 WezTerm · Rio · PowerToys · Tailscale · Claude · Claude Code · Sublime Text 4 ·
-Spark
+Spark · **PowerShell 7** · **Starship** · **JetBrains Mono Nerd Font**
+
+The last three are the shell environment. Windows ships PowerShell 5.1 and keeps
+it; 7 installs alongside as `pwsh`. Starship reads the same `starship.toml` you
+already use elsewhere, and the Nerd Font is what stops its glyphs rendering as
+boxes.
 
 ---
 
@@ -95,6 +100,7 @@ asks, and each answer is independent.
 | Group | Packages | Offered from | Default |
 |---|---|---|---|
 | `extras` | TeamViewer · AnyDesk · Google Earth Pro | `mini` | **yes** on mini and base |
+| `cli` | bat · eza · fd · ripgrep · fzf · zoxide · yazi · Neovim · lazygit · jq · yq | `pro` | no |
 | `dev` | Node.js · Python 3.12 · DBeaver Community | `pro` | no |
 | `cloud` | Google Cloud SDK · AWS CLI | `pro` | no |
 | `infra` | Docker Desktop · Vagrant | `pro` | no |

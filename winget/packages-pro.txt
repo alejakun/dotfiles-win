@@ -27,6 +27,14 @@ Microsoft.WindowsTerminal
 wez.wezterm
 raphamorim.rio
 
+# Shell environment
+# PowerShell 7 is the cross-platform one; Windows still ships 5.1 and the two
+# coexist as pwsh and powershell. Starship reads the same starship.toml as on
+# macOS, and the font is what keeps its glyphs from rendering as boxes.
+Microsoft.PowerShell
+Starship.Starship
+DEVCOM.JetBrainsMonoNerdFont
+
 # Windows Productivity
 Microsoft.PowerToys
 

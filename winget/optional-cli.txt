@@ -1,0 +1,31 @@
+# ================================================================================
+# Optional group - Modern command-line tools
+# ================================================================================
+# Read by install.ps1. The three fields below drive the prompt:
+#
+# Label:   Modern command-line tools
+# Offer:   pro
+# Default:
+#
+# The Unix-side muscle memory: the replacements you reach for without thinking
+# once you are used to them. Ported straight from the macOS setup, where these
+# are installed with Homebrew.
+
+# File and text
+sharkdp.bat
+eza-community.eza
+sharkdp.fd
+BurntSushi.ripgrep.MSVC
+
+# Navigation
+junegunn.fzf
+ajeetdsouza.zoxide
+sxyazi.yazi
+
+# Editing and git
+Neovim.Neovim
+JesseDuffield.lazygit
+
+# Data
+jqlang.jq
+MikeFarah.yq
