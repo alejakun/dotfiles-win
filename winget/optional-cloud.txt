@@ -1,0 +1,17 @@
+# ================================================================================
+# Optional group - Cloud provider CLIs
+# ================================================================================
+# Read by install.ps1. The three fields below drive the prompt:
+#
+# Label:   Cloud provider CLIs
+# Offer:   pro
+# Default: 
+#
+# "Offer" is the lowest rung this group is offered from. "Default" lists the
+# profiles where the answer defaults to yes; anywhere else it defaults to no.
+# Defaulting to no is deliberate: undoing an unwanted install costs more than
+# running again when you notice something missing.
+
+# Cloud CLI Tools
+Google.CloudSDK
+Amazon.AWSCLI

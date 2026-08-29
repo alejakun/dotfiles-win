@@ -1,0 +1,20 @@
+# ================================================================================
+# Optional group - Remote support tools and Earth Pro
+# ================================================================================
+# Read by install.ps1. The three fields below drive the prompt:
+#
+# Label:   Remote support tools and Earth Pro
+# Offer:   mini
+# Default: mini, base
+#
+# "Offer" is the lowest rung this group is offered from. "Default" lists the
+# profiles where the answer defaults to yes; anywhere else it defaults to no.
+# Defaulting to no is deliberate: undoing an unwanted install costs more than
+# running again when you notice something missing.
+
+# Remote Access
+TeamViewer.TeamViewer
+AnyDesk.AnyDesk
+
+# Geographic Tools
+Google.EarthPro

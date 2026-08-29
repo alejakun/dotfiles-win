@@ -1,0 +1,20 @@
+# ================================================================================
+# Optional group - Programming runtimes and database client
+# ================================================================================
+# Read by install.ps1. The three fields below drive the prompt:
+#
+# Label:   Programming runtimes and database client
+# Offer:   pro
+# Default: 
+#
+# "Offer" is the lowest rung this group is offered from. "Default" lists the
+# profiles where the answer defaults to yes; anywhere else it defaults to no.
+# Defaulting to no is deliberate: undoing an unwanted install costs more than
+# running again when you notice something missing.
+
+# Runtimes
+OpenJS.NodeJS
+Python.Python.3.12
+
+# Database Tools
+DBeaver.DBeaver.Community
