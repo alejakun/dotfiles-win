@@ -106,6 +106,15 @@ asks, and each answer is independent.
 | `infra` | Docker Desktop · Vagrant | `pro` | no |
 | `wsl` | Windows Subsystem for Linux | `pro` | no |
 
+**`wsl` needs two more steps after the install.** The package alone leaves
+`wsl.exe` reporting `WSL_E_WSL_OPTIONAL_COMPONENT_REQUIRED`: the Windows optional
+component is separate and winget cannot enable it.
+
+```powershell
+wsl.exe --install --no-distribution   # enables the component, may reboot
+wsl --install -d Ubuntu               # then the distribution
+```
+
 **`extras`** are worth pre-installing on a machine you expect to support, so the
 remote access tools are already there the day you need them — and worth leaving
 off your own machine, where they are services running at boot for nothing.
