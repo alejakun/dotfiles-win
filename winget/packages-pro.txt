@@ -50,3 +50,6 @@ SublimeHQ.SublimeText.4
 
 # Mail
 Readdle.Spark
+
+# Nota: Krisp (cancelación de ruido) no está en winget - no existe publisher que
+# coincida. Se instala a mano desde krisp.ai; ver MANUAL_INSTALL.md.
