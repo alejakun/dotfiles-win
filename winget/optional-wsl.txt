@@ -16,7 +16,13 @@
 # uses. Ansible itself is not a winget package: it is "apt install ansible"
 # inside the distro. See MANUAL_INSTALL.md.
 #
-# This installs the platform only. The distribution is a separate step:
-#   wsl --install -d Ubuntu
+# Installing this package is NOT enough on its own. Verified on a real machine:
+# winget puts the app in place, but wsl.exe then reports
+# WSL_E_WSL_OPTIONAL_COMPONENT_REQUIRED, because the Windows optional component
+# is a separate thing that winget cannot enable. Three steps, in order:
+#
+#   1. this package                       (winget, done here)
+#   2. wsl.exe --install --no-distribution (enables the component; may reboot)
+#   3. wsl --install -d Ubuntu             (the distribution itself)
 
 Microsoft.WSL
