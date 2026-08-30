@@ -99,7 +99,7 @@ asks, and each answer is independent.
 
 | Group | Packages | Offered from | Default |
 |---|---|---|---|
-| `extras` | TeamViewer · AnyDesk · Google Earth Pro | `mini` | **yes** on mini and base |
+| `extras` | TeamViewer · AnyDesk | `mini` | **yes** on mini and base |
 | `cli` | bat · eza · fd · ripgrep · fzf · zoxide · yazi · Neovim · lazygit · jq · yq | `pro` | no |
 | `dev` | Node.js · Python 3.12 · DBeaver Community | `pro` | no |
 | `cloud` | Google Cloud SDK · AWS CLI | `pro` | no |

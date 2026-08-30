@@ -17,4 +17,13 @@ TeamViewer.TeamViewer
 AnyDesk.AnyDesk
 
 # Geographic Tools
-Google.EarthPro
+#
+# [STANDBY] Google.EarthPro - apagado a propósito, no retirado.
+# La versión reciente de AutoCAD/CivilCAD, que se instala a mano en las máquinas
+# donde hace falta, ya trae su propio Google Earth. Instalarlo aparte duplicaría
+# algo que llega con el CAD.
+#
+# El ID es válido: descomentar lo reactiva. Se comenta en vez de borrarse
+# justamente por eso - a diferencia de VMware o Krisp, que no existen en winget
+# y por eso viven solo en MANUAL_INSTALL.md.
+# Google.EarthPro
