@@ -15,7 +15,16 @@ Zoom.Zoom
 
 # Utilities
 Doxie.Doxie
-QL-Win.QuickLook
+#
+# [STANDBY] QL-Win.QuickLook - apagado a propósito, no retirado.
+# PowerToys (en pro) trae Peek, que hace lo mismo. Se está probando cuál
+# conviene: QuickLook usa la barra espaciadora como en macOS, Peek usa
+# Ctrl+Espacio y no requiere un paquete aparte. Si Peek gana, esta línea se
+# borra; si no, se descomenta.
+#
+# Ojo: apagarlo aquí NO desinstala lo que ya esté en una máquina.
+#   winget uninstall --id QL-Win.QuickLook
+# QL-Win.QuickLook
 ShareX.ShareX
 
 # Media
