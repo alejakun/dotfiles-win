@@ -70,7 +70,7 @@ $env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/al
 |---|---|---|---|
 | `mini` | 5 | 5 | A machine you hand to someone else |
 | `base` | +6 | 11 | Everyday family use |
-| `pro` | +18 | 30 | Your own machine |
+| `pro` | +19 | 30 | Your own machine |
 
 ### 🏠 mini — 5
 Chrome · Firefox · Adobe Acrobat Reader · 7-Zip · Microsoft Office
@@ -84,7 +84,7 @@ in its place — the two do the same job, and Peek needs no extra package.
 ### 💼 pro — +18
 Dropbox · Brave · Zen Browser · Git · GitHub CLI · VSCode · Windows Terminal ·
 WezTerm · Rio · PowerToys · Tailscale · Claude · Claude Code · Sublime Text 4 ·
-Spark · **PowerShell 7** · **Starship** · **JetBrains Mono Nerd Font**
+Spark · mpv · **PowerShell 7** · **Starship** · **JetBrains Mono Nerd Font**
 
 The last three are the shell environment. Windows ships PowerShell 5.1 and keeps
 it; 7 installs alongside as `pwsh`. Starship reads the same `starship.toml` you
