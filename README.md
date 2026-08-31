@@ -84,7 +84,7 @@ in its place — the two do the same job, and Peek needs no extra package.
 ### 💼 pro — +18
 Dropbox · Brave · Zen Browser · Git · GitHub CLI · VSCode · Windows Terminal ·
 WezTerm · Rio · PowerToys · Tailscale · Claude · Claude Code · Sublime Text 4 ·
-Spark · mpv · **PowerShell 7** · **Starship** · **JetBrains Mono Nerd Font**
+Spark · mpv.net · **PowerShell 7** · **Starship** · **JetBrains Mono Nerd Font**
 
 The last three are the shell environment. Windows ships PowerShell 5.1 and keeps
 it; 7 installs alongside as `pwsh`. Starship reads the same `starship.toml` you
