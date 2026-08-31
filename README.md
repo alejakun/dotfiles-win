@@ -70,7 +70,7 @@ $env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/al
 |---|---|---|---|
 | `mini` | 5 | 5 | A machine you hand to someone else |
 | `base` | +6 | 11 | Everyday family use |
-| `pro` | +19 | 30 | Your own machine |
+| `pro` | +20 | 31 | Your own machine |
 
 ### 🏠 mini — 5
 Chrome · Firefox · Adobe Acrobat Reader · 7-Zip · Microsoft Office
@@ -82,7 +82,7 @@ QuickLook is in the file but commented out while PowerToys' Peek is being tried
 in its place — the two do the same job, and Peek needs no extra package.
 
 ### 💼 pro — +18
-Dropbox · Brave · Zen Browser · Git · GitHub CLI · VSCode · Windows Terminal ·
+Dropbox · Brave · Zen Browser · OpenSSH 10 · Git · GitHub CLI · VSCode · Windows Terminal ·
 WezTerm · Rio · PowerToys · Tailscale · Claude · Claude Code · Sublime Text 4 ·
 Spark · mpv.net · **PowerShell 7** · **Starship** · **JetBrains Mono Nerd Font**
 
