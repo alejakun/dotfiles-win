@@ -69,14 +69,17 @@ $env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/al
 | Profile | Adds | Total | For |
 |---|---|---|---|
 | `mini` | 5 | 5 | A machine you hand to someone else |
-| `base` | +7 | 12 | Everyday family use |
+| `base` | +6 | 11 | Everyday family use |
 | `pro` | +18 | 30 | Your own machine |
 
 ### 🏠 mini — 5
 Chrome · Firefox · Adobe Acrobat Reader · 7-Zip · Microsoft Office
 
-### 📦 base — +7
-Bitwarden · Rambox · Zoom · Doxie Scanner · QuickLook · ShareX · VLC
+### 📦 base — +6
+Bitwarden · Rambox · Zoom · Doxie Scanner · ShareX · VLC
+
+QuickLook is in the file but commented out while PowerToys' Peek is being tried
+in its place — the two do the same job, and Peek needs no extra package.
 
 ### 💼 pro — +18
 Dropbox · Brave · Zen Browser · Git · GitHub CLI · VSCode · Windows Terminal ·
