@@ -18,6 +18,16 @@ Brave.Brave
 Zen-Team.Zen-Browser
 
 # Essential Tools
+#
+# Windows 10 trae OpenSSH 8.1p1, de 2019. Este paquete instala el 10.x en
+# C:\Program Files\OpenSSH. Importa porque en esta configuracion SSH no es un
+# accesorio: es como se trabaja contra los hosts Unix. Y 8.1 es anterior a
+# cambios de default que ya mordieron - CheckHostIP paso a "no" en 8.5.
+#
+# "Preview" es un nombre historico; es la via con la que Microsoft publica
+# OpenSSH mas nuevo que el de fabrica. Tras instalarlo, verificar que el PATH
+# tome el nuevo:  ssh -V   debe decir 10.x, no 8.1p1.
+Microsoft.OpenSSH.Preview
 Git.Git
 GitHub.cli
 Microsoft.VisualStudioCode
