@@ -51,5 +51,10 @@ SublimeHQ.SublimeText.4
 # Mail
 Readdle.Spark
 
+# Media
+# La contraparte de iina en la Mac, que es un frontend de mpv. Si prefieres una
+# interfaz más de Windows, mpv.net es la alternativa (ID: mpv.net).
+shinchiro.mpv
+
 # Nota: Krisp (cancelación de ruido) no está en winget - no existe publisher que
 # coincida. Se instala a mano desde krisp.ai; ver MANUAL_INSTALL.md.
