@@ -353,8 +353,11 @@ if ($ShowCommands) {
     Write-Host ""
     Write-Host "Copy and paste these commands to install packages individually:" -ForegroundColor Yellow
     Write-Host ""
+    # Sin --source, igual que $baseArgs: fijarlo a "winget" seria mentira para los
+    # paquetes que vienen de msstore, y el punto de -ShowCommands es imprimir
+    # exactamente lo que el script ejecutaria.
     $packages | ForEach-Object {
-        Write-Host "winget install --id $_ -e --source winget" -ForegroundColor Green
+        Write-Host "winget install --id $_ -e" -ForegroundColor Green
     }
     $npmPackages | ForEach-Object {
         Write-Host "npm install -g $_" -ForegroundColor Green

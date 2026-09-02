@@ -87,15 +87,25 @@ $wslFeatures = @(
     @{ Name = "VirtualMachinePlatform";            Label = "Virtual Machine Platform" }
 )
 
+# NOT Get-WindowsOptionalFeature / Enable-WindowsOptionalFeature. Those live in
+# the DISM module, which is a Windows PowerShell module: under PowerShell 7 it
+# fails with "Class not registered". Verified on a real machine 2026-09-02.
+#
+# CIM answers the query with a NUMBER, which also sidesteps parsing DISM's text
+# output - that is localized, so "Enabled" reads "Habilitado" on this machine.
+# dism.exe does the enabling and reports through its exit code: 0 for done,
+# 3010 for done-but-needs-a-reboot. Both work identically on 5.1 and 7.
 foreach ($feature in $wslFeatures) {
-    $state = Get-WindowsOptionalFeature -Online -FeatureName $feature.Name -ErrorAction SilentlyContinue
+    $state = Get-CimInstance -ClassName Win32_OptionalFeature `
+        -Filter "Name='$($feature.Name)'" -ErrorAction SilentlyContinue
 
     if (-not $state) {
         Write-Warn "  not available on this edition: $($feature.Label)"
         continue
     }
 
-    if ($state.State -eq "Enabled") {
+    # InstallState: 1 = Enabled, 2 = Disabled, 3 = Absent
+    if ($state.InstallState -eq 1) {
         Write-Host "  [=] already enabled: $($feature.Label)" -ForegroundColor Gray
         continue
     }
@@ -106,10 +116,16 @@ foreach ($feature in $wslFeatures) {
         continue
     }
 
-    $result = Enable-WindowsOptionalFeature -Online -FeatureName $feature.Name -NoRestart -All
-    Write-Success "  enabled: $($feature.Label)"
-    $changed++
-    if ($result.RestartNeeded) { $rebootNeeded = $true }
+    & dism.exe /online /enable-feature /featurename:$($feature.Name) /all /norestart | Out-Null
+    $dismCode = $LASTEXITCODE
+
+    if ($dismCode -eq 0 -or $dismCode -eq 3010) {
+        Write-Success "  enabled: $($feature.Label)"
+        $changed++
+        if ($dismCode -eq 3010) { $rebootNeeded = $true }
+    } else {
+        Write-Err "  could not enable $($feature.Label) (dism exit code $dismCode)"
+    }
 }
 
 # --------------------------------------------------------------------------------

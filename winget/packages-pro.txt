@@ -62,10 +62,26 @@ SublimeHQ.SublimeText.4
 Readdle.Spark
 
 # Messaging
-# Rambox agrupa las mensajerias y es lo que se usa a diario. Telegram nativo esta
-# aqui como respaldo: cuando Rambox falla o la maquina se pone rara, no quedarse
-# incomunicado importa mas que la comodidad de tenerlo todo en una ventana.
+# Rambox agrupa las mensajerias y es lo que se usa a diario. Telegram y WhatsApp
+# nativos estan aqui como respaldo: cuando Rambox falla o la maquina se pone
+# rara, no quedarse incomunicado importa mas que la comodidad de tenerlo todo en
+# una ventana.
 Telegram.TelegramDesktop
+
+# Los dos siguientes vienen de MICROSOFT STORE, no del catalogo winget, y por eso
+# su id es un Store Product ID en vez de Publisher.Package.
+#
+# Verificado el 2026-09-02 en una maquina real, que era la duda: `winget list
+# --id <StoreId> --exact` SI los detecta una vez instalados, asi que
+# Test-PackageInstalled funciona y el script no los reinstala en cada corrida.
+#
+# Son MSIX, de modo que se instalan por usuario: `--scope machine` falla, el
+# script reintenta sin restriccion y aparecen en el reporte de paquetes
+# user-scoped. Es el comportamiento correcto, no un fallo.
+# WhatsApp
+9NKSQGP7F2NH
+# Fantastical (Flexibits)
+9P0KN9S5RP86
 
 # Media
 # La contraparte de iina en la Mac: iina es un frontend de mpv, y mpv.net es el
