@@ -280,7 +280,20 @@ foreach ($name in $OptionalGroupNames) {
     $group = Get-OptionalGroup -Name $name -ScriptDir $scriptDir
 
     if (-not $group -or $group.Packages.Count -eq 0) { continue }
-    if ($profileIndex -lt $ProfileLadder.IndexOf($group.Offer)) { continue }
+
+    # IndexOf devuelve -1 si Offer no es un peldano valido. Sin esta guarda, un
+    # typo en el archivo del grupo hace que -1 gane siempre la comparacion de
+    # abajo y el grupo se ofrezca en TODOS los niveles, mini incluido. Fallar
+    # ruidosamente: un error de dedo no debe cambiar que se le pregunta a una
+    # maquina familiar.
+    $offerIndex = $ProfileLadder.IndexOf($group.Offer)
+    if ($offerIndex -lt 0) {
+        Write-Warn "Grupo '$name': 'Offer: $($group.Offer)' no es un perfil valido, se omite"
+        Write-Host "  Perfiles validos: $($ProfileLadder -join ', ')" -ForegroundColor Gray
+        continue
+    }
+
+    if ($profileIndex -lt $offerIndex) { continue }
 
     $byDefault = $InstallProfile -in $group.Default
 
