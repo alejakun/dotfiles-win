@@ -98,6 +98,25 @@ $ProfileLadder = @("mini", "base", "pro")
 # adding one means adding a file and its name here - no code.
 $OptionalGroupNames = @("extras", "cli", "dev", "cloud", "infra", "wsl")
 
+function Get-PackageLines {
+    param([string[]]$Lines)
+
+    # Recorta el comentario final y los espacios ANTES de filtrar.
+    #
+    # Filtrar solo por '^\s*#' dejaba pasar "Pkg.Id  # nota" integro hacia winget,
+    # y como se invoca con --exact el paquete fallaba en silencio. Un espacio al
+    # final bastaba para lo mismo. Es la misma trampa del # inline que en
+    # .gitignore dejo una regla inerte durante meses.
+    #
+    # De paso habilita comentarios en la misma linea, que es lo que hace legible
+    # un id de Microsoft Store como 9NKSQGP7F2NH.
+    #
+    # Vive en una funcion porque habia DOS copias de este filtro -aqui y en
+    # Get-PackagesFromProfile- y ambas cargaban el mismo defecto. Una tercera
+    # copia divergiendo era cuestion de tiempo.
+    return @($Lines | ForEach-Object { ($_ -replace '\s*#.*$', '').Trim() } | Where-Object { $_ })
+}
+
 function Get-OptionalGroup {
     param([string]$Name, [string]$ScriptDir)
 
@@ -120,7 +139,7 @@ function Get-OptionalGroup {
         }
     }
 
-    $group.Packages = @($lines | Where-Object { $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$' })
+    $group.Packages = Get-PackageLines -Lines $lines
     return $group
 }
 
@@ -139,9 +158,7 @@ function Get-PackagesFromProfile {
         $packageFile = Join-Path $ScriptDir "$PackageType\$file"
 
         if (Test-Path $packageFile) {
-            $allPackages += Get-Content $packageFile | Where-Object {
-                $_ -and $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$'
-            }
+            $allPackages += Get-PackageLines -Lines (Get-Content $packageFile)
         }
     }
 

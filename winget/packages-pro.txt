@@ -78,10 +78,8 @@ Telegram.TelegramDesktop
 # Son MSIX, de modo que se instalan por usuario: `--scope machine` falla, el
 # script reintenta sin restriccion y aparecen en el reporte de paquetes
 # user-scoped. Es el comportamiento correcto, no un fallo.
-# WhatsApp
-9NKSQGP7F2NH
-# Fantastical (Flexibits)
-9P0KN9S5RP86
+9NKSQGP7F2NH   # WhatsApp
+9P0KN9S5RP86   # Fantastical (Flexibits)
 
 # Media
 # La contraparte de iina en la Mac: iina es un frontend de mpv, y mpv.net es el
