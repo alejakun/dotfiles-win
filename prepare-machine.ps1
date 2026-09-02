@@ -25,6 +25,11 @@
 #
 # Idempotent: it inspects the current state and skips whatever is already done.
 # Written for PowerShell 5.1 as well as 7, because it may run before pwsh exists.
+#
+# The whole body lives inside a function on purpose. This repo is delivered with
+# "iwr ... | iex", and iex runs in the CALLER's scope: a bare `exit` would close
+# the user's shell instead of ending the script - taking the error message that
+# explains the failure with it. Inside a function, `return` ends only the call.
 
 param(
     [switch]$DryRun
@@ -36,6 +41,9 @@ function Write-Step    { param([string]$Message) Write-Host "[*] $Message" -Fore
 function Write-Success { param([string]$Message) Write-Host "[+] $Message" -ForegroundColor Green }
 function Write-Warn    { param([string]$Message) Write-Host "[!] $Message" -ForegroundColor Yellow }
 function Write-Err     { param([string]$Message) Write-Host "[-] $Message" -ForegroundColor Red }
+
+function Invoke-MachinePreparation {
+    param([switch]$DryRun)
 
 Write-Host ""
 Write-Host "=====================================" -ForegroundColor Cyan
@@ -56,7 +64,7 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
     Write-Host "  Win+X -> Terminal (Admin), or:" -ForegroundColor Gray
     Write-Host "    Start-Process powershell -Verb RunAs -ArgumentList '-File','$PSCommandPath'" -ForegroundColor Gray
     Write-Host ""
-    exit 1
+    return 1
 }
 
 $rebootNeeded = $false
@@ -151,7 +159,7 @@ if ($DryRun) {
     Write-Host ""
     Write-Host "  $changed item(s) would be applied." -ForegroundColor Gray
     Write-Host ""
-    exit 0
+    return 0
 }
 
 Write-Host "   Done" -ForegroundColor Cyan
@@ -161,7 +169,7 @@ Write-Host ""
 if ($changed -eq 0) {
     Write-Host "  Nothing to do - the machine was already prepared." -ForegroundColor Gray
     Write-Host ""
-    exit 0
+    return 0
 }
 
 if ($rebootNeeded) {
@@ -175,3 +183,10 @@ Write-Host "Next, in a NORMAL (non-elevated) session:" -ForegroundColor Gray
 Write-Host "  .\install.ps1 -Profile pro        packages, including the wsl group" -ForegroundColor Gray
 Write-Host "  pwsh <dotfiles>\hosts\windows\install.ps1   your configuration" -ForegroundColor Gray
 Write-Host ""
+}
+
+# Delivered with "iwr ... | iex", where there is no way to pass a parameter, so
+# the env var is the only channel for a dry run. Same convention as bootstrap.ps1.
+if ($env:DOTFILES_DRYRUN -eq "1") { $DryRun = $true }
+
+Invoke-MachinePreparation -DryRun:$DryRun | Out-Null

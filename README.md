@@ -70,13 +70,21 @@ Some things are not packages and not configuration: they change the machine
 itself, need administrator rights, and can require a reboot. Those live in
 `prepare-machine.ps1`, run **once**, before anything else:
 
-```powershell
-# Elevated session: Win+X -> Terminal (Admin)
-.\prepare-machine.ps1
+Open **PowerShell as Administrator** (Win+X → *Terminal (Admin)*) and run:
 
-# See what it would do without touching anything
-.\prepare-machine.ps1 -DryRun
+```powershell
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/prepare-machine.ps1 | iex
 ```
+
+To see what it would change without touching anything:
+
+```powershell
+$env:DOTFILES_DRYRUN = "1"
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/prepare-machine.ps1 | iex
+Remove-Item Env:\DOTFILES_DRYRUN
+```
+
+From a clone, the parameter works directly: `.\prepare-machine.ps1 -DryRun`.
 
 It handles two things today:
 
