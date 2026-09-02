@@ -61,6 +61,12 @@ SublimeHQ.SublimeText.4
 # Mail
 Readdle.Spark
 
+# Messaging
+# Rambox agrupa las mensajerias y es lo que se usa a diario. Telegram nativo esta
+# aqui como respaldo: cuando Rambox falla o la maquina se pone rara, no quedarse
+# incomunicado importa mas que la comodidad de tenerlo todo en una ventana.
+Telegram.TelegramDesktop
+
 # Media
 # La contraparte de iina en la Mac: iina es un frontend de mpv, y mpv.net es el
 # equivalente en Windows — mismo motor, con menús y ventana nativa en vez de

@@ -64,6 +64,47 @@ $env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/al
 
 ---
 
+## ⚙️ Machine preparation
+
+Some things are not packages and not configuration: they change the machine
+itself, need administrator rights, and can require a reboot. Those live in
+`prepare-machine.ps1`, run **once**, before anything else:
+
+```powershell
+# Elevated session: Win+X -> Terminal (Admin)
+.\prepare-machine.ps1
+
+# See what it would do without touching anything
+.\prepare-machine.ps1 -DryRun
+```
+
+It handles two things today:
+
+- **WSL optional components.** The `Microsoft.WSL` winget package is not enough
+  on its own — `wsl.exe` then reports `WSL_E_WSL_OPTIONAL_COMPONENT_REQUIRED`,
+  because these are Windows optional components that winget cannot enable.
+- **The Windows `ssh-agent` service.** It competes with Bitwarden's SSH agent for
+  `\\.\pipe\openssh-ssh-agent`. Bitwarden claims that pipe once, at startup, and
+  gives up silently if it is taken — leaving the toggle on and the agent mute.
+
+The script inspects the current state and skips whatever is already done, so
+running it again is safe and reports that there was nothing to do.
+
+**Installing a WSL distribution is not done here.** Once the components are live
+it needs no special rights, so it belongs with the rest of the software — the
+`wsl` optional group in `install.ps1`. If a reboot was required, it has to happen
+before that step or the distribution install fails.
+
+### The three scripts
+
+| Script | Does | Elevation |
+|---|---|---|
+| `prepare-machine.ps1` | Prepares the machine | Always |
+| `install.ps1` | Installs packages | Optional — without it, winget falls back to user scope |
+| `hosts/windows/install.ps1` (dotfiles) | Configures your environment | Never, by design |
+
+---
+
 ## 📋 Profiles
 
 | Profile | Adds | Total | For |
@@ -81,10 +122,10 @@ Bitwarden · Rambox · Zoom · Doxie Scanner · ShareX · VLC
 QuickLook is in the file but commented out while PowerToys' Peek is being tried
 in its place — the two do the same job, and Peek needs no extra package.
 
-### 💼 pro — +18
+### 💼 pro — +21
 Dropbox · Brave · Zen Browser · OpenSSH 10 · Git · GitHub CLI · VSCode · Windows Terminal ·
 WezTerm · Rio · PowerToys · Tailscale · Claude · Claude Code · Sublime Text 4 ·
-Spark · mpv.net · **PowerShell 7** · **Starship** · **JetBrains Mono Nerd Font**
+Spark · mpv.net · Telegram · **PowerShell 7** · **Starship** · **JetBrains Mono Nerd Font**
 
 The last three are the shell environment. Windows ships PowerShell 5.1 and keeps
 it; 7 installs alongside as `pwsh`. Starship reads the same `starship.toml` you
@@ -425,6 +466,7 @@ aws --version
 
 ```
 dotfiles-win/
+├── prepare-machine.ps1           # Run ONCE, elevated, before anything else
 ├── bootstrap.ps1                 # Remote installer + mini one-liner
 ├── bootstrap-base.ps1            # One-liner: base
 ├── bootstrap-pro.ps1             # One-liner: pro
@@ -434,9 +476,11 @@ dotfiles-win/
 │   ├── packages-base.txt         # layer; install.ps1 merges every level
 │   ├── packages-pro.txt          # below the one you asked for
 │   ├── optional-extras.txt       # Optional groups, asked at run time.
-│   ├── optional-dev.txt          # Metadata in each file header decides
-│   ├── optional-cloud.txt        # where it is offered and its default
-│   └── optional-infra.txt
+│   ├── optional-cli.txt          # Metadata in each file header decides
+│   ├── optional-dev.txt          # where it is offered and its default
+│   ├── optional-cloud.txt
+│   ├── optional-infra.txt
+│   └── optional-wsl.txt
 ├── npm/
 │   └── optional-dev.txt          # Global npm packages, tied to the dev group
 ├── MANUAL_INSTALL.md             # Manual installation guide
