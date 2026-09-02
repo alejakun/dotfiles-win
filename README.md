@@ -130,10 +130,10 @@ Bitwarden · Rambox · Zoom · Doxie Scanner · ShareX · VLC
 QuickLook is in the file but commented out while PowerToys' Peek is being tried
 in its place — the two do the same job, and Peek needs no extra package.
 
-### 💼 pro — +21
+### 💼 pro — +23
 Dropbox · Brave · Zen Browser · OpenSSH 10 · Git · GitHub CLI · VSCode · Windows Terminal ·
 WezTerm · Rio · PowerToys · Tailscale · Claude · Claude Code · Sublime Text 4 ·
-Spark · mpv.net · Telegram · **PowerShell 7** · **Starship** · **JetBrains Mono Nerd Font**
+Spark · mpv.net · Telegram · WhatsApp · Fantastical · **PowerShell 7** · **Starship** · **JetBrains Mono Nerd Font**
 
 The last three are the shell environment. Windows ships PowerShell 5.1 and keeps
 it; 7 installs alongside as `pwsh`. Starship reads the same `starship.toml` you
