@@ -34,7 +34,7 @@ Solo macOS. El resto de los hosts tiene su propio instalador dentro de
 | 4 | `gh auth login -w -s admin:public_key` | El navegador, **una sola vez** |
 | 5 | Genera `~/.ssh/id_ed25519` | La identidad de este equipo |
 | 6 | `gh ssh-key add` | La registra en GitHub **sin navegador** |
-| 7 | Clona por SSH y ejecuta `bin/install.sh --all` | Entrega el control |
+| 7 | Clona por SSH y ejecuta `install.sh --all` | Entrega el control |
 
 ### Por qué el orden importa
 
@@ -64,11 +64,11 @@ Todo esto vive en `dotfiles` y duplicarlo aquí solo crea deriva:
 |---|---|
 | Instalar paquetes | `brew/Brewfile` |
 | Configurar git | `git/.gitconfig` y `git/macos.gitconfig.local` |
-| Logging y reportes | `bin/install.sh` ya escribe a `~/.dotfiles-install-logs/` |
+| Logging y reportes | El instalador ya escribe a `~/.dotfiles-install-logs/` |
 | Xcode CLI Tools explícitas | El instalador de Homebrew las instala solo |
 
 La única duplicación intencional es la generación de la llave (paso 5), que
-repite a `bin/tools/gh-setup-ssh`. Es inevitable: esa herramienta vive dentro del
+repite a `bin/gh-setup-ssh`. Es inevitable: esa herramienta vive dentro del
 repositorio privado, que en ese momento no se puede clonar. **Si cambia una,
 cambia la otra.**
 
