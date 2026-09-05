@@ -72,6 +72,29 @@ if ($DryRun) {
     Write-Host ""
 }
 
+# --------------------------------------------------------------------------------
+# Elevation
+# --------------------------------------------------------------------------------
+# The inverse of prepare-machine.ps1's check, and the more dangerous of the two:
+# elevation here does not fail, it silently does the wrong thing. In an elevated
+# session $env:USERPROFILE is the administrator's, so the key would be written to
+# that profile, the repo cloned into that home, and hosts\windows\install.ps1
+# would configure the administrator's environment instead of yours - reporting
+# success at every step.
+$identity  = [Security.Principal.WindowsIdentity]::GetCurrent()
+$principal = New-Object Security.Principal.WindowsPrincipal($identity)
+
+if ($principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Err "This must NOT run elevated"
+    Write-Host "  Everything here is per-user: your SSH key, your clone, your profile." -ForegroundColor Gray
+    Write-Host "  Run elevated, all three land in the administrator's profile" -ForegroundColor Gray
+    Write-Host "  ($env:USERPROFILE) and the run still reports success." -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  Close this window, open a NORMAL session, and run it again." -ForegroundColor Gray
+    Write-Host ""
+    return 1
+}
+
 $sshDir = Join-Path $env:USERPROFILE ".ssh"
 $key    = Join-Path $sshDir "id_ed25519"
 $target = Join-Path $env:USERPROFILE ".dotfiles"
