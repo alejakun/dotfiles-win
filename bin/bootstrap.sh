@@ -1,25 +1,21 @@
 #!/bin/bash
 
 # ============================================================================
-# bootstrap.sh - Clona e instala dotfiles
+# bootstrap.sh - Arranque de una Mac nueva
 # ============================================================================
-# Prerequisitos (ejecutar pre-bootstrap.sh primero):
-# - Xcode Command Line Tools
-# - Homebrew
-# - GitHub CLI (gh) autenticado
+# Uso:
+#   bash <(curl -fsSL https://raw.githubusercontent.com/alejakun/dotfiles-bootstrap/main/bin/bootstrap.sh)
 #
-# Este script:
-# - Descubre dinámicamente el usuario de GitHub
-# - Clona dotfiles usando HTTPS (no requiere SSH keys)
-# - Inicializa submodules
-# - Configura logging
-# - Ejecuta instalación completa
-# - Genera reporte post-mortem
+# Instala lo mínimo para poder clonar el repositorio privado de dotfiles y le
+# entrega el control a su instalador. Todo lo demás vive allá: paquetes,
+# symlinks, configuración de git, shells y logging.
 #
-# Uso: bash <(curl -fsSL https://raw.githubusercontent.com/alejakun/dotfiles-bootstrap/main/bin/bootstrap.sh)
+# El orden importa. GitHub CLI se autentica por navegador una sola vez, y con
+# ese token registra la llave SSH de este equipo. A partir de ahí todo es SSH,
+# incluido el primer clon: HTTPS nunca se usa como transporte de git.
 # ============================================================================
 
-set -e  # Exit on error
+set -e
 
 # Colors
 RED='\033[0;31m'
@@ -29,14 +25,7 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Directories
 DOTFILES_DIR="$HOME/.dotfiles"
-LOG_DIR="$HOME/.dotfiles-install-logs"
-LOG_FILE="$LOG_DIR/install-$(date +%Y%m%d-%H%M%S).log"
-
-# ============================================================================
-# Helper Functions
-# ============================================================================
 
 print_header() {
     echo ""
@@ -46,289 +35,181 @@ print_header() {
     echo ""
 }
 
-print_step() {
-    echo -e "${YELLOW}▸${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}✓${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}✗${NC} $1"
-}
-
-print_info() {
-    echo -e "${CYAN}ℹ${NC} $1"
-}
-
-log() {
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
-}
-
-# ============================================================================
-# Prerequisite Checks
-# ============================================================================
-
-check_prerequisites() {
-    print_header "🔍 Verificando Prerequisitos"
-
-    local missing=0
-
-    # Check Homebrew
-    if ! command -v brew &>/dev/null; then
-        print_error "Homebrew no instalado"
-        ((missing++))
-    else
-        print_success "Homebrew: $(brew --version | head -n1)"
-    fi
-
-    # Check GitHub CLI
-    if ! command -v gh &>/dev/null; then
-        print_error "GitHub CLI no instalado"
-        ((missing++))
-    else
-        print_success "GitHub CLI: $(gh --version | head -n1)"
-    fi
-
-    # Check GitHub authentication
-    if ! gh auth status &>/dev/null; then
-        print_error "No autenticado con GitHub"
-        ((missing++))
-    else
-        print_success "Autenticado con GitHub"
-    fi
-
-    if [[ $missing -gt 0 ]]; then
-        echo ""
-        print_error "Faltan $missing prerequisito(s)"
-        print_info "Ejecuta primero: bash <(curl -fsSL https://raw.githubusercontent.com/alejakun/dotfiles-bootstrap/main/bin/pre-bootstrap.sh)"
-        exit 1
-    fi
-
-    print_success "Todos los prerequisitos están instalados"
-}
-
-# ============================================================================
-# Main Script
-# ============================================================================
+print_step()    { echo -e "${YELLOW}▸${NC} $1"; }
+print_success() { echo -e "${GREEN}✓${NC} $1"; }
+print_error()   { echo -e "${RED}✗${NC} $1"; }
+print_info()    { echo -e "${CYAN}ℹ${NC} $1"; }
 
 print_header "🚀 Dotfiles Bootstrap"
 
-# Setup logging
-mkdir -p "$LOG_DIR"
-log "=== Dotfiles Bootstrap Started ==="
-log "Timestamp: $(date)"
-log "User: $(whoami)"
-log "macOS: $(sw_vers -productVersion)"
-
-# Check prerequisites
-check_prerequisites
-
 # ============================================================================
-# 1. Discover GitHub User
+# 1. Guardia de plataforma
 # ============================================================================
 
-print_step "Descubriendo usuario de GitHub..."
-
-GH_USER=$(gh api user --jq '.login' 2>/dev/null || echo "")
-
-if [[ -z "$GH_USER" ]]; then
-    print_error "No se pudo obtener usuario de GitHub"
-    log "ERROR: Failed to get GitHub user"
+if [[ "$OSTYPE" != "darwin"* ]]; then
+    print_error "Este script solo funciona en macOS"
+    print_info "Para los demás hosts usa el instalador que les corresponde:"
+    print_info "  hosts/debian/install.sh, hosts/synology/install.sh"
     exit 1
 fi
 
-print_success "Usuario de GitHub: $GH_USER"
-log "GitHub user: $GH_USER"
+print_success "macOS $(sw_vers -productVersion)"
 
 # ============================================================================
-# 2. Clone Dotfiles
+# 2. Homebrew
+# ============================================================================
+# El instalador de Homebrew instala las Xcode Command Line Tools si faltan, y
+# con ellas llega git. Por eso este es el primer paso real: antes de Homebrew
+# esta máquina no tiene con qué clonar nada.
+
+print_step "Verificando Homebrew..."
+
+if command -v brew &>/dev/null; then
+    print_success "Homebrew ya instalado"
+else
+    print_info "Instalando Homebrew (incluye las Xcode Command Line Tools)..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Apple Silicon instala en /opt/homebrew, que no está en el PATH todavía.
+    if [[ -x /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -x /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+
+    if ! command -v brew &>/dev/null; then
+        print_error "Homebrew no quedó en el PATH"
+        exit 1
+    fi
+    print_success "Homebrew instalado"
+fi
+
+# ============================================================================
+# 3. GitHub CLI
+# ============================================================================
+
+print_step "Verificando GitHub CLI..."
+
+if command -v gh &>/dev/null; then
+    print_success "GitHub CLI ya instalado"
+else
+    print_info "Instalando GitHub CLI..."
+    brew install gh
+    print_success "GitHub CLI instalado"
+fi
+
+# ============================================================================
+# 4. Autenticación con GitHub
+# ============================================================================
+# Los scopes por defecto de `gh auth login` son repo, read:org y gist. Registrar
+# una llave SSH necesita admin:public_key, que no viene incluido: pedirlo aquí
+# evita una segunda vuelta al navegador con `gh auth refresh` más adelante.
+
+print_step "Verificando autenticación con GitHub..."
+
+if gh auth status &>/dev/null && gh auth status 2>&1 | grep -q "admin:public_key"; then
+    print_success "Ya autenticado, con permiso para registrar llaves"
+else
+    print_info "Se abrirá el navegador para autenticar con GitHub"
+    gh auth login -h github.com -p https -w -s admin:public_key
+
+    if ! gh auth status &>/dev/null; then
+        print_error "Error autenticando con GitHub"
+        exit 1
+    fi
+    print_success "Autenticado con GitHub"
+fi
+
+GH_USER=$(gh api user --jq '.login')
+print_success "Usuario de GitHub: $GH_USER"
+
+# ============================================================================
+# 5. Llave SSH de este equipo
+# ============================================================================
+# Esto duplica a bin/tools/gh-setup-ssh a propósito: esa herramienta vive dentro
+# del repositorio privado, que todavía no se puede clonar. Mantener los dos
+# bloques idénticos es lo que hace que ambas vías produzcan la misma llave.
+
+KEY="$HOME/.ssh/id_ed25519"
+
+print_step "Verificando la llave SSH de este equipo..."
+
+if [[ -f "$KEY" ]]; then
+    print_success "Ya existe una llave en $KEY"
+    ssh-keygen -lf "${KEY}.pub" | awk '{print "  " $2}'
+else
+    mkdir -p "$HOME/.ssh"
+    chmod 700 "$HOME/.ssh"
+
+    # El comentario es solo etiqueta; sirve para reconocerla en GitHub.
+    email="$(git config user.email 2>/dev/null || true)"
+    [[ -z "$email" ]] && email="$(whoami)@$(hostname)"
+
+    print_info "Generando la llave de GitHub de este equipo..."
+    print_info "Se recomienda ponerle passphrase."
+    ssh-keygen -t ed25519 -C "$email" -f "$KEY"
+
+    # En macOS el llavero guarda la passphrase.
+    ssh-add --apple-use-keychain "$KEY" 2>/dev/null || \
+        print_info "  (no se pudo cargar en el agente; no es bloqueante)"
+
+    print_success "Llave generada"
+fi
+
+# ============================================================================
+# 6. Registrar la llave en GitHub
+# ============================================================================
+# Sin navegador: el token del paso 4 ya trae admin:public_key.
+
+print_step "Registrando la llave en GitHub..."
+
+key_fingerprint=$(ssh-keygen -lf "${KEY}.pub" | awk '{print $2}')
+
+if gh ssh-key list 2>/dev/null | grep -q "$key_fingerprint"; then
+    print_success "La llave ya estaba registrada"
+else
+    title="$(scutil --get ComputerName 2>/dev/null || hostname)"
+    gh ssh-key add "${KEY}.pub" --title "$title"
+    print_success "Llave registrada como: $title"
+fi
+
+# Verifica de punta a punta antes de intentar el clon. accept-new agrega la
+# huella de GitHub sin preguntar; en una máquina nueva no está en known_hosts y
+# el script se detendría esperando un "yes".
+print_step "Verificando acceso SSH a GitHub..."
+
+if ssh -T -o StrictHostKeyChecking=accept-new git@github.com 2>&1 | grep -q "successfully authenticated"; then
+    print_success "GitHub responde a la llave de este equipo"
+else
+    print_error "GitHub no reconoció la llave"
+    print_info "Revisa con: ssh -vT git@github.com"
+    exit 1
+fi
+
+# ============================================================================
+# 7. Clonar dotfiles y entregar el control
 # ============================================================================
 
 print_step "Clonando dotfiles..."
 
 if [[ -d "$DOTFILES_DIR" ]]; then
-    print_info "El directorio $DOTFILES_DIR ya existe"
-    read -p "¿Eliminar y clonar de nuevo? (s/N): " -n 1 -r
-    echo ""
-
-    if [[ $REPLY =~ ^[SsYy]$ ]]; then
-        print_info "Eliminando $DOTFILES_DIR..."
-        rm -rf "$DOTFILES_DIR"
-        log "Removed existing $DOTFILES_DIR"
-    else
-        print_info "Usando dotfiles existentes"
-        log "Using existing dotfiles"
-    fi
-fi
-
-if [[ ! -d "$DOTFILES_DIR" ]]; then
-    # Clone using HTTPS (no SSH key needed)
-    REPO_URL="https://github.com/${GH_USER}/dotfiles.git"
-
-    print_info "Clonando desde: $REPO_URL"
-    log "Cloning from: $REPO_URL"
-
-    # Clone with gh (uses gh auth directly, no git config needed)
-    if gh repo clone "${GH_USER}/dotfiles" "$DOTFILES_DIR" -- --recurse-submodules; then
-        print_success "Dotfiles clonados correctamente"
-        log "SUCCESS: Dotfiles cloned"
-    else
-        print_error "Error clonando dotfiles"
-        log "ERROR: Failed to clone dotfiles"
-        exit 1
-    fi
-
-    # Configure gh as credential helper for future git operations (after clone)
-    print_info "Configurando autenticación GitHub para HTTPS..."
-    git config --global --replace-all credential.helper "!gh auth git-credential" || \
-        git config --global credential.helper "!gh auth git-credential"
-    log "Configured gh as git credential helper"
+    print_info "$DOTFILES_DIR ya existe; se conserva y se salta el clon"
 else
-    print_info "Actualizando submodules..."
-    cd "$DOTFILES_DIR"
-    if git submodule update --init --recursive; then
-        print_success "Submodules actualizados"
-        log "SUCCESS: Submodules updated"
-    else
-        print_error "Error actualizando submodules"
-        log "ERROR: Failed to update submodules"
-    fi
+    git clone --recurse-submodules \
+        "git@github.com:${GH_USER}/dotfiles.git" "$DOTFILES_DIR"
+    print_success "Dotfiles clonados en $DOTFILES_DIR"
 fi
-
-# ============================================================================
-# 3. Run Installation
-# ============================================================================
-
-print_step "Ejecutando instalación completa..."
 
 cd "$DOTFILES_DIR"
 
 if [[ ! -f "bin/install.sh" ]]; then
-    print_error "No se encontró bin/install.sh"
-    log "ERROR: bin/install.sh not found"
+    print_error "No se encontró bin/install.sh en $DOTFILES_DIR"
     exit 1
 fi
 
-log "Running: bin/install.sh --all"
-print_info "Ejecutando: bin/install.sh --all"
-print_info "Logs en: $LOG_FILE"
+print_header "📦 Instalación"
+print_info "A partir de aquí manda el instalador del repositorio."
+print_info "Sus logs quedan en ~/.dotfiles-install-logs/"
 echo ""
 
-# Run install.sh and capture output
-if bash bin/install.sh --all 2>&1 | tee -a "$LOG_FILE"; then
-    print_success "Instalación completada"
-    log "SUCCESS: Installation completed"
-else
-    print_error "Instalación completada con errores (verifica el log)"
-    log "WARNING: Installation completed with errors"
-fi
-
-# ============================================================================
-# 4. Generate Post-Mortem Report
-# ============================================================================
-
-print_header "📊 Reporte de Instalación"
-
-REPORT_FILE="$LOG_DIR/report-$(date +%Y%m%d-%H%M%S).md"
-
-cat > "$REPORT_FILE" << EOF
-# Reporte de Instalación - Dotfiles
-
-**Fecha:** $(date)
-**Usuario:** $(whoami)
-**macOS:** $(sw_vers -productVersion)
-**GitHub User:** $GH_USER
-
----
-
-## Resumen
-
-\`\`\`
-$(tail -n 50 "$LOG_FILE")
-\`\`\`
-
----
-
-## Logs Completos
-
-Ver: $LOG_FILE
-
----
-
-## Verificaciones Post-Instalación
-
-### Shell Configurado
-\`\`\`bash
-echo \$SHELL
-# Debería ser: /bin/zsh o /opt/homebrew/bin/fish
-\`\`\`
-
-### Variables de Ambiente
-\`\`\`bash
-env | grep -E '(DOTFILES|XDG)'
-\`\`\`
-
-### Aplicaciones Homebrew
-\`\`\`bash
-brew list
-brew list --cask
-\`\`\`
-
-### Symlinks Verificación
-\`\`\`bash
-ls -la ~/.config/
-ls -la ~/.ssh/
-\`\`\`
-
----
-
-## Siguientes Pasos
-
-1. **Reiniciar terminal** para aplicar configuraciones de shell
-2. **Verificar symlinks** funcionan correctamente
-3. **Configurar aplicaciones manuales** (si no fueron instaladas)
-4. **Revisar logs** para cualquier error: \`$LOG_FILE\`
-
----
-
-**Generado por:** dotfiles-bootstrap
-EOF
-
-print_success "Reporte generado: $REPORT_FILE"
-log "Report generated: $REPORT_FILE"
-
-# ============================================================================
-# 5. Summary
-# ============================================================================
-
-print_header "✅ Bootstrap Completado"
-
-echo -e "${GREEN}Instalación completada correctamente${NC}"
-echo ""
-echo -e "📁 Dotfiles: ${CYAN}$DOTFILES_DIR${NC}"
-echo -e "📋 Logs: ${CYAN}$LOG_FILE${NC}"
-echo -e "📊 Reporte: ${CYAN}$REPORT_FILE${NC}"
-echo ""
-
-print_info "Siguiente paso: Reinicia tu terminal"
-echo ""
-
-# Ask to open report
-read -p "¿Abrir reporte ahora? (s/N): " -n 1 -r
-echo ""
-
-if [[ $REPLY =~ ^[SsYy]$ ]]; then
-    if command -v bat &>/dev/null; then
-        bat "$REPORT_FILE"
-    elif command -v less &>/dev/null; then
-        less "$REPORT_FILE"
-    else
-        cat "$REPORT_FILE"
-    fi
-fi
-
-log "=== Bootstrap Completed ==="
-
-print_success "¡Todo listo!"
+exec bash bin/install.sh --all
