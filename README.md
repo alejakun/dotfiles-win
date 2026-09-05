@@ -66,7 +66,7 @@ $env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/al
 
 ## 🧭 A machine from scratch, end to end
 
-Six steps across two repositories. The order matters and none of it is obvious
+Five steps across two repositories. The order matters and none of it is obvious
 from either README alone, which is why it is written down here.
 
 | # | Step | Where | Elevated |
@@ -74,25 +74,25 @@ from either README alone, which is why it is written down here.
 | 1 | `prepare-machine.ps1` | this repo | **Yes** |
 | 2 | Reboot, if step 1 asked for one | — | — |
 | 3 | `install.ps1` (or a bootstrap one-liner) | this repo | Optional |
-| 4 | Generate this device's GitHub key and register it | — | No |
-| 5 | Clone the private dotfiles repo, run `hosts\windows\install.ps1` | dotfiles | No |
-| 6 | For WSL: install a distro, then `wsl-setup.sh`, then `hosts/debian/install.sh` | dotfiles | No |
+| 4 | `get-dotfiles.ps1` | this repo | No |
+| 5 | For WSL: install a distro, then `wsl-setup.sh`, then `hosts/debian/install.sh` | dotfiles | No |
 
-**Step 4 comes before step 5, and that is the part people get wrong.** The
-dotfiles repo is private: cloning it needs credentials. Without an SSH key, git
-falls back to HTTPS with a token, which works — and quietly leaves the machine
-off the intended path. It also has a consequence beyond preference: Ansible
-hands remote nodes whatever lives in your default SSH agent, so a machine set up
-without an SSH key cannot provision the homelab.
+**Step 4 registers this machine's SSH key before it clones, and that order is the
+whole point.** The dotfiles repo is private, so cloning it needs credentials.
+Left alone, git falls back to HTTPS with a token, which works — and quietly
+leaves the machine off the intended path. The consequence goes beyond
+preference: Ansible hands remote nodes whatever lives in your default SSH agent,
+so a machine set up without an SSH key cannot provision the homelab.
 
 Verified on 2026-09-04: a node was found a month behind for exactly that reason,
-reporting success on every run.
+reporting success on every run. Step 4 used to be done by hand, which is how that
+happened; `get-dotfiles.ps1` exists so it cannot be skipped.
 
-**Step 6 is only for machines that will run Ansible or want a Linux userland.**
+**Step 5 is only for machines that will run Ansible or want a Linux userland.**
 It is not required for a machine that only needs applications and configuration.
 
-Steps 1 to 3 are documented below. Steps 4 to 6 live in the dotfiles repo — see
-its README and `docs/ssh-identities.md`.
+Steps 1 to 4 are documented below. Step 5 lives in the dotfiles repo — see its
+README and `docs/ssh-identities.md`.
 
 ---
 
@@ -135,13 +135,26 @@ it needs no special rights, so it belongs with the rest of the software — the
 `wsl` optional group in `install.ps1`. If a reboot was required, it has to happen
 before that step or the distribution install fails.
 
-### The three scripts
+### The four scripts
 
 | Script | Does | Elevation |
 |---|---|---|
 | `prepare-machine.ps1` | Prepares the machine | Always |
 | `install.ps1` | Installs packages | Optional — without it, winget falls back to user scope |
+| `get-dotfiles.ps1` | Registers this machine's GitHub key, clones the private repo | Never |
 | `hosts/windows/install.ps1` (dotfiles) | Configures your environment | Never, by design |
+
+`get-dotfiles.ps1` lives here, in the public repo, for the same reason the whole
+bootstrap does: the code that obtains the credential cannot live behind the
+credential. It hands off to `hosts/windows/install.ps1` when it finishes.
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/get-dotfiles.ps1 | iex
+```
+
+It needs PowerShell 7 and the `pro` profile, which is where `Git.Git` and
+`GitHub.cli` come from. Preview it with
+`$env:DOTFILES_DRYRUN="1"` before the one-liner, or `-DryRun` from a clone.
 
 ---
 
