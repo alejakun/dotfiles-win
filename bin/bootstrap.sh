@@ -127,8 +127,13 @@ print_success "Usuario de GitHub: $GH_USER"
 # 5. Llave SSH de este equipo
 # ============================================================================
 # Esto duplica a bin/tools/gh-setup-ssh a propósito: esa herramienta vive dentro
-# del repositorio privado, que todavía no se puede clonar. Mantener los dos
-# bloques idénticos es lo que hace que ambas vías produzcan la misma llave.
+# del repositorio privado, que todavía no se puede clonar. Mantener los bloques
+# idénticos es lo que hace que todas las vías produzcan la misma llave.
+#
+# Son tres copias, y hay que cambiarlas juntas:
+#   dotfiles-bootstrap/bin/bootstrap.sh  este (arranque de una Mac)
+#   dotfiles/bin/tools/gh-setup-ssh      rotación, y hosts Unix
+#   dotfiles-win/get-dotfiles.ps1        arranque de Windows
 
 KEY="$HOME/.ssh/id_ed25519"
 
