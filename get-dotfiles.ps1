@@ -195,7 +195,7 @@ if ($user) {
 # load a key from disk. With a passphrase you would type it on every git fetch.
 # The defence for this key is being able to revoke it, not the passphrase.
 #
-# This mirrors ../dotfiles/bin/tools/gh-setup-ssh and the macOS bootstrap. It is
+# This mirrors ../dotfiles/bin/gh-setup-ssh and the macOS bootstrap. It is
 # a port, not a copy that could be shared: those are bash. Change one, change all.
 Write-Step "Checking this machine's SSH key..."
 
