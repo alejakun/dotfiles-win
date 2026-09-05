@@ -126,13 +126,13 @@ print_success "Usuario de GitHub: $GH_USER"
 # ============================================================================
 # 5. Llave SSH de este equipo
 # ============================================================================
-# Esto duplica a bin/tools/gh-setup-ssh a propósito: esa herramienta vive dentro
+# Esto duplica a bin/gh-setup-ssh a propósito: esa herramienta vive dentro
 # del repositorio privado, que todavía no se puede clonar. Mantener los bloques
 # idénticos es lo que hace que todas las vías produzcan la misma llave.
 #
 # Son tres copias, y hay que cambiarlas juntas:
 #   dotfiles-bootstrap/bin/bootstrap.sh  este (arranque de una Mac)
-#   dotfiles/bin/tools/gh-setup-ssh      rotación, y hosts Unix
+#   dotfiles/bin/gh-setup-ssh      rotación, y hosts Unix
 #   dotfiles-win/get-dotfiles.ps1        arranque de Windows
 
 KEY="$HOME/.ssh/id_ed25519"
@@ -207,8 +207,10 @@ fi
 
 cd "$DOTFILES_DIR"
 
-if [[ ! -f "bin/install.sh" ]]; then
-    print_error "No se encontró bin/install.sh en $DOTFILES_DIR"
+# install.sh en la raiz detecta el host y delega en hosts/darwin/install.sh.
+# Antes del 2026-09-05 el instalador de macOS era el de la raiz, en bin/.
+if [[ ! -f "install.sh" ]]; then
+    print_error "No se encontró install.sh en $DOTFILES_DIR"
     exit 1
 fi
 
@@ -217,4 +219,4 @@ print_info "A partir de aquí manda el instalador del repositorio."
 print_info "Sus logs quedan en ~/.dotfiles-install-logs/"
 echo ""
 
-exec bash bin/install.sh --all
+exec bash install.sh --all
