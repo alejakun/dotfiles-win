@@ -64,6 +64,38 @@ $env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/al
 
 ---
 
+## 🧭 A machine from scratch, end to end
+
+Six steps across two repositories. The order matters and none of it is obvious
+from either README alone, which is why it is written down here.
+
+| # | Step | Where | Elevated |
+|---|---|---|---|
+| 1 | `prepare-machine.ps1` | this repo | **Yes** |
+| 2 | Reboot, if step 1 asked for one | — | — |
+| 3 | `install.ps1` (or a bootstrap one-liner) | this repo | Optional |
+| 4 | Generate this device's GitHub key and register it | — | No |
+| 5 | Clone the private dotfiles repo, run `hosts\windows\install.ps1` | dotfiles | No |
+| 6 | For WSL: install a distro, then `wsl-setup.sh`, then `hosts/debian/install.sh` | dotfiles | No |
+
+**Step 4 comes before step 5, and that is the part people get wrong.** The
+dotfiles repo is private: cloning it needs credentials. Without an SSH key, git
+falls back to HTTPS with a token, which works — and quietly leaves the machine
+off the intended path. It also has a consequence beyond preference: Ansible
+hands remote nodes whatever lives in your default SSH agent, so a machine set up
+without an SSH key cannot provision the homelab.
+
+Verified on 2026-09-04: a node was found a month behind for exactly that reason,
+reporting success on every run.
+
+**Step 6 is only for machines that will run Ansible or want a Linux userland.**
+It is not required for a machine that only needs applications and configuration.
+
+Steps 1 to 3 are documented below. Steps 4 to 6 live in the dotfiles repo — see
+its README and `docs/ssh-identities.md`.
+
+---
+
 ## ⚙️ Machine preparation
 
 Some things are not packages and not configuration: they change the machine
