@@ -16,7 +16,7 @@ repositorio principal.
 ## Uso
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/alejakun/dotfiles-bootstrap/main/bin/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/alejakun/bootstrap/master/macos/bootstrap.sh)
 ```
 
 Solo macOS. El resto de los hosts tiene su propio instalador dentro de
@@ -121,4 +121,4 @@ en blanco desde que se escribieron. Primera corrida real pendiente.
 ## Relacionado
 
 - [dotfiles](https://github.com/alejakun/dotfiles) — repositorio principal (privado)
-- [dotfiles-win](https://github.com/alejakun/dotfiles-win) — el equivalente para Windows
+- [`windows/`](../windows/) — el equivalente para Windows, en este mismo repositorio

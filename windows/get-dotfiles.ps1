@@ -6,7 +6,7 @@
 # it, and establish the SSH identity needed to do so.
 #
 #   prepare-machine.ps1   machine-level changes that need administrator rights
-#   install.ps1           packages, including git and GitHub CLI in the pro profile
+#   install-packages.ps1           packages, including git and GitHub CLI in the pro profile
 #   this script           this machine's GitHub identity, and the clone
 #   ..\dotfiles\hosts\windows\install.ps1   your configuration
 #
@@ -102,7 +102,7 @@ $target = Join-Path $env:USERPROFILE ".dotfiles"
 # --------------------------------------------------------------------------------
 # 1. Prerequisites
 # --------------------------------------------------------------------------------
-# Both come from install.ps1's pro profile (Git.Git, GitHub.cli). ssh.exe ships
+# Both come from install-packages.ps1's pro profile (Git.Git, GitHub.cli). ssh.exe ships
 # with Windows itself.
 Write-Step "Checking prerequisites..."
 
@@ -124,7 +124,7 @@ foreach ($tool in @("git", "gh", "ssh", "ssh-keygen")) {
 
 if ($missing.Count -gt 0) {
     Write-Err "Missing: $($missing -join ', ')"
-    Write-Host "  Install the pro profile first:  .\install.ps1 -Profile pro" -ForegroundColor Gray
+    Write-Host "  Install the pro profile first:  .\install-packages.ps1 -Profile pro" -ForegroundColor Gray
     Write-Host ""
     return 1
 }

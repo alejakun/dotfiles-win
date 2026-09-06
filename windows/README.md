@@ -1,4 +1,4 @@
-# dotfiles-win
+# bootstrap · windows
 
 > Automated Windows application installation using winget with multiple profiles
 
@@ -20,17 +20,17 @@ if it is missing, rather than letting every install fail one by one:
 
 **mini** (a machine for someone else — the essentials):
 ```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap.ps1 | iex
 ```
 
 **base** (adds passwords, calls and media):
 ```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-base.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap-base.ps1 | iex
 ```
 
 **pro** (your own machine — browsers, editors, terminals):
 ```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap-pro.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap-pro.ps1 | iex
 ```
 
 Each run also **asks** about the optional groups that apply. See
@@ -43,17 +43,17 @@ Swap the profile name in these for whichever level you want.
 **Preview first — lists what is already installed and what would be added.**
 Needs neither git nor elevation:
 ```powershell
-$env:DOTFILES_PROFILE="pro"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+$env:DOTFILES_PROFILE="pro"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap.ps1 | iex
 ```
 
 **Any profile without its own URL**, if you would rather use one address:
 ```powershell
-$env:DOTFILES_PROFILE="pro"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+$env:DOTFILES_PROFILE="pro"; iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap.ps1 | iex
 ```
 
 **Test a branch before merging it:**
 ```powershell
-$env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+$env:DOTFILES_BRANCH="my-branch"; iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap.ps1 | iex
 ```
 
 > `DOTFILES_DRYRUN` is consumed when read, so it cannot silently turn a later
@@ -73,7 +73,7 @@ from either README alone, which is why it is written down here.
 |---|---|---|---|
 | 1 | `prepare-machine.ps1` | this repo | **Yes** |
 | 2 | Reboot, if step 1 asked for one | — | — |
-| 3 | `install.ps1` (or a bootstrap one-liner) | this repo | Optional |
+| 3 | `install-packages.ps1` (or a bootstrap one-liner) | this repo | Optional |
 | 4 | `get-dotfiles.ps1` | this repo | No |
 | 5 | For WSL: install a distro, then `wsl-setup.sh`, then `hosts/debian/install.sh` | dotfiles | No |
 
@@ -105,14 +105,14 @@ itself, need administrator rights, and can require a reboot. Those live in
 Open **PowerShell as Administrator** (Win+X → *Terminal (Admin)*) and run:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/prepare-machine.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/prepare-machine.ps1 | iex
 ```
 
 To see what it would change without touching anything:
 
 ```powershell
 $env:DOTFILES_DRYRUN = "1"
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/prepare-machine.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/prepare-machine.ps1 | iex
 Remove-Item Env:\DOTFILES_DRYRUN
 ```
 
@@ -132,7 +132,7 @@ running it again is safe and reports that there was nothing to do.
 
 **Installing a WSL distribution is not done here.** Once the components are live
 it needs no special rights, so it belongs with the rest of the software — the
-`wsl` optional group in `install.ps1`. If a reboot was required, it has to happen
+`wsl` optional group in `install-packages.ps1`. If a reboot was required, it has to happen
 before that step or the distribution install fails.
 
 ### The four scripts
@@ -140,7 +140,7 @@ before that step or the distribution install fails.
 | Script | Does | Elevation |
 |---|---|---|
 | `prepare-machine.ps1` | Prepares the machine | Always |
-| `install.ps1` | Installs packages | Optional — without it, winget falls back to user scope |
+| `install-packages.ps1` | Installs packages | Optional — without it, winget falls back to user scope |
 | `get-dotfiles.ps1` | Registers this machine's GitHub key, clones the private repo | Never |
 | `hosts/windows/install.ps1` (dotfiles) | Configures your environment | Never, by design |
 
@@ -149,7 +149,7 @@ bootstrap does: the code that obtains the credential cannot live behind the
 credential. It hands off to `hosts/windows/install.ps1` when it finishes.
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/get-dotfiles.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/get-dotfiles.ps1 | iex
 ```
 
 It needs PowerShell 7 and the `pro` profile, which is where `Git.Git` and
@@ -223,7 +223,7 @@ whatever is already there.
 To answer in advance, or from a script:
 
 ```powershell
-.\install.ps1 -Profile pro -Optional dev,cloud
+.\install-packages.ps1 -Profile pro -Optional dev,cloud
 ```
 
 With no interactive session the defaults are applied silently rather than
@@ -232,7 +232,7 @@ blocking on a prompt nobody can see.
 ### Adding a group
 
 Drop a `winget/optional-<name>.txt` file with this header and add `<name>` to
-`$OptionalGroupNames` in `install.ps1` and `$allGroups` in `bootstrap.ps1`:
+`$OptionalGroupNames` in `install-packages.ps1` and `$allGroups` in `bootstrap.ps1`:
 
 ```
 # Label:   What the prompt calls it
@@ -257,17 +257,17 @@ Needs git, which this repo installs in `pro` — so on a fresh machine use the
 one-liner, or grab the zip:
 
 ```powershell
-iwr -useb https://github.com/alejakun/dotfiles-win/archive/refs/heads/master.zip -OutFile dotfiles.zip
+iwr -useb https://github.com/alejakun/bootstrap/archive/refs/heads/master.zip -OutFile dotfiles.zip
 Expand-Archive dotfiles.zip -DestinationPath .
-cd dotfiles-win-master
+cd bootstrap-master/windows
 ```
 
 With git available:
 
 ```powershell
-git clone https://github.com/alejakun/dotfiles-win.git
-cd dotfiles-win
-.\install.ps1 -Profile pro
+git clone https://github.com/alejakun/bootstrap.git
+cd bootstrap/windows
+.\install-packages.ps1 -Profile pro
 ```
 
 ### Method 3: Picking a Level
@@ -275,14 +275,14 @@ cd dotfiles-win
 Each profile includes the ones below it, so a single command is always enough:
 
 ```powershell
-.\install.ps1 -Profile pro     # mini + base + pro
+.\install-packages.ps1 -Profile pro     # mini + base + pro
 ```
 
 Packages already installed are detected and skipped, so moving up a level later
 only installs what is missing:
 
 ```powershell
-.\install.ps1 -Profile pro     # mini + base + pro
+.\install-packages.ps1 -Profile pro     # mini + base + pro
 ```
 
 ---
@@ -294,7 +294,7 @@ only installs what is missing:
 Needs neither git nor elevation, so it works on a machine straight out of the box:
 
 ```powershell
-$env:DOTFILES_PROFILE="pro"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+$env:DOTFILES_PROFILE="pro"; $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap.ps1 | iex
 ```
 
 `DOTFILES_DRYRUN` is consumed on read, so the next run in the same terminal
@@ -303,7 +303,7 @@ installs for real rather than silently previewing again.
 From a cloned repo:
 
 ```powershell
-.\install.ps1 -Profile pro -DryRun
+.\install-packages.ps1 -Profile pro -DryRun
 ```
 
 Checks each package against winget and marks what is already on the machine, so
@@ -323,7 +323,7 @@ the installed program to its catalogue.
 ### Show Individual Commands
 
 ```powershell
-.\install.ps1 -Profile pro -ShowCommands
+.\install-packages.ps1 -Profile pro -ShowCommands
 ```
 
 This displays individual `winget install` commands you can copy/paste. It is also
@@ -333,7 +333,7 @@ Docker on a machine that has no use for Node or the cloud CLIs.
 ### Help
 
 ```powershell
-.\install.ps1 -Help
+.\install-packages.ps1 -Help
 ```
 
 ---
@@ -342,7 +342,7 @@ Docker on a machine that has no use for Node or the cloud CLIs.
 
 Run the install from the **administrator account**, elevated. Most packages
 install machine-wide, so they are available to every account on the box
-regardless of who installed them — `install.ps1` asks winget for machine scope
+regardless of who installed them — `install-packages.ps1` asks winget for machine scope
 explicitly rather than letting it choose, since a per-user install would land
 only in the installing account's profile and the other user would silently never
 see it.
@@ -443,7 +443,7 @@ Docker and TeamViewer install machine-wide and would fail one by one.
 To install without elevation anyway — only user-scope packages will succeed:
 
 ```powershell
-.\install.ps1 -Profile pro -SkipAdminCheck
+.\install-packages.ps1 -Profile pro -SkipAdminCheck
 ```
 
 ---
@@ -453,14 +453,14 @@ To install without elevation anyway — only user-scope packages will succeed:
 Windows ships with script execution disabled (`Restricted`) by default.
 
 **The one-liners already handle this.** They are run from memory by `iex`, which
-the policy does not apply to, and they launch `install.ps1` in a child process
+the policy does not apply to, and they launch `install-packages.ps1` in a child process
 with `-ExecutionPolicy Bypass` — so your own session's policy is never changed.
 
-You only hit this running `.\install.ps1` yourself from a clone. Either run it
+You only hit this running `.\install-packages.ps1` yourself from a clone. Either run it
 the same way:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1 -Profile pro
+powershell -ExecutionPolicy Bypass -File .\install-packages.ps1 -Profile pro
 ```
 
 or allow local scripts for your user, which persists:
@@ -518,15 +518,15 @@ aws --version
 ## 📁 Structure
 
 ```
-dotfiles-win/
+bootstrap/windows/
 ├── prepare-machine.ps1           # Run ONCE, elevated, before anything else
 ├── bootstrap.ps1                 # Remote installer + mini one-liner
 ├── bootstrap-base.ps1            # One-liner: base
 ├── bootstrap-pro.ps1             # One-liner: pro
-├── install.ps1                   # Main installation script
+├── install-packages.ps1                   # Main installation script
 ├── winget/
 │   ├── packages-mini.txt         # The ladder. Each file holds only its own
-│   ├── packages-base.txt         # layer; install.ps1 merges every level
+│   ├── packages-base.txt         # layer; install-packages.ps1 merges every level
 │   ├── packages-pro.txt          # below the one you asked for
 │   ├── optional-extras.txt       # Optional groups, asked at run time.
 │   ├── optional-cli.txt          # Metadata in each file header decides

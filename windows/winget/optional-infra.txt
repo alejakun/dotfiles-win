@@ -1,7 +1,7 @@
 # ================================================================================
 # Optional group - Containers and virtualization
 # ================================================================================
-# Read by install.ps1. The three fields below drive the prompt:
+# Read by install-packages.ps1. The three fields below drive the prompt:
 #
 # Label:   Containers and virtualization
 # Offer:   pro

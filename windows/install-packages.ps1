@@ -5,11 +5,11 @@
 # Installs common applications using winget
 #
 # Usage:
-#   .\install.ps1                # Install the mini profile (default)
-#   .\install.ps1 -Profile pro   # Each profile includes the ones below it
-#   .\install.ps1 -DryRun        # Show what would be installed
-#   .\install.ps1 -ShowCommands  # Display individual winget commands
-#   .\install.ps1 -Help          # Show help message
+#   .\install-packages.ps1                # Install the mini profile (default)
+#   .\install-packages.ps1 -Profile pro   # Each profile includes the ones below it
+#   .\install-packages.ps1 -DryRun        # Show what would be installed
+#   .\install-packages.ps1 -ShowCommands  # Display individual winget commands
+#   .\install-packages.ps1 -Help          # Show help message
 #
 # Requires an elevated PowerShell session (Win+X -> Terminal (Admin)).
 
@@ -173,15 +173,15 @@ if ($Help) {
     Write-Host "=====================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "USAGE:" -ForegroundColor Yellow
-    Write-Host "  .\install.ps1                      Install mini profile (default)"
-    Write-Host "  .\install.ps1 -Profile mini        Family computers"
-    Write-Host "  .\install.ps1 -Profile base        + passwords, calls, media"
-    Write-Host "  .\install.ps1 -Profile pro         + browsers, editors, terminals"
-    Write-Host "  .\install.ps1 -DryRun              Preview packages without installing"
-    Write-Host "  .\install.ps1 -ShowCommands        Display individual winget commands"
-    Write-Host "  .\install.ps1 -Help                Show this help message"
-    Write-Host "  .\install.ps1 -SkipAdminCheck      Run without elevation (most installs fail)"
-    Write-Host "  .\install.ps1 -Optional dev,cloud  Include optional groups without asking"
+    Write-Host "  .\install-packages.ps1                      Install mini profile (default)"
+    Write-Host "  .\install-packages.ps1 -Profile mini        Family computers"
+    Write-Host "  .\install-packages.ps1 -Profile base        + passwords, calls, media"
+    Write-Host "  .\install-packages.ps1 -Profile pro         + browsers, editors, terminals"
+    Write-Host "  .\install-packages.ps1 -DryRun              Preview packages without installing"
+    Write-Host "  .\install-packages.ps1 -ShowCommands        Display individual winget commands"
+    Write-Host "  .\install-packages.ps1 -Help                Show this help message"
+    Write-Host "  .\install-packages.ps1 -SkipAdminCheck      Run without elevation (most installs fail)"
+    Write-Host "  .\install-packages.ps1 -Optional dev,cloud  Include optional groups without asking"
     Write-Host ""
     Write-Host "PROFILES:" -ForegroundColor Yellow
     Write-Host "  Each profile extends the one before it, so picking a level installs"
@@ -206,19 +206,19 @@ if ($Help) {
     Write-Host ""
     Write-Host "EXAMPLES:" -ForegroundColor Yellow
     Write-Host "  # Family computer (default)"
-    Write-Host "  .\install.ps1"
+    Write-Host "  .\install-packages.ps1"
     Write-Host ""
     Write-Host "  # Your own machine"
-    Write-Host "  .\install.ps1 -Profile pro"
+    Write-Host "  .\install-packages.ps1 -Profile pro"
     Write-Host ""
     Write-Host "  # Everything, without being asked"
-    Write-Host "  .\install.ps1 -Profile pro -Optional extras,dev,cloud,infra"
+    Write-Host "  .\install-packages.ps1 -Profile pro -Optional extras,dev,cloud,infra"
     Write-Host ""
     Write-Host "  # Preview what would be installed"
-    Write-Host "  .\install.ps1 -Profile pro -DryRun"
+    Write-Host "  .\install-packages.ps1 -Profile pro -DryRun"
     Write-Host ""
     Write-Host "  # See individual commands to copy/paste"
-    Write-Host "  .\install.ps1 -ShowCommands -Profile pro"
+    Write-Host "  .\install-packages.ps1 -ShowCommands -Profile pro"
     Write-Host ""
     exit 0
 }
@@ -253,10 +253,10 @@ if (-not $SkipAdminCheck) {
         Write-Host "  2. Choose 'Terminal (Admin)' or 'Windows PowerShell (Admin)'" -ForegroundColor Gray
         Write-Host "  3. Run:" -ForegroundColor Gray
         Write-Host ""
-        Write-Host "     .\install.ps1 -Profile $InstallProfile" -ForegroundColor Green
+        Write-Host "     .\install-packages.ps1 -Profile $InstallProfile" -ForegroundColor Green
         Write-Host ""
         Write-Host "To install anyway - only user-scope packages will succeed - use:" -ForegroundColor Gray
-        Write-Host "     .\install.ps1 -Profile $InstallProfile -SkipAdminCheck" -ForegroundColor Gray
+        Write-Host "     .\install-packages.ps1 -Profile $InstallProfile -SkipAdminCheck" -ForegroundColor Gray
         Write-Host ""
         exit 1
     }

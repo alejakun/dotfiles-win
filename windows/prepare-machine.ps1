@@ -7,19 +7,19 @@
 #
 # Why this is a separate script:
 #
-#   install.ps1                   installs packages. Elevation is optional there:
+#   install-packages.ps1                   installs packages. Elevation is optional there:
 #                                 without it, winget falls back to user scope.
 #   get-dotfiles.ps1              registers this machine's GitHub key and clones
 #                                 the private repo. All per-user.
 #   ../dotfiles/hosts/windows/    configures your environment. It NEVER elevates
-#     install.ps1                 by design - junctions, User-scope variables,
+#     install-packages.ps1                 by design - junctions, User-scope variables,
 #                                 HKCU and $PROFILE are all per-user.
 #   this script                   changes the machine itself. Always needs admin,
 #                                 and may require a reboot.
 #
 # Run it ONCE, before everything else. Installing a WSL distribution is NOT done
 # here: once the optional components are live it needs no special rights, so it
-# belongs with the rest of the software in install.ps1's "wsl" optional group.
+# belongs with the rest of the software in install-packages.ps1's "wsl" optional group.
 #
 # Usage:
 #   .\prepare-machine.ps1           Apply what is missing
@@ -198,7 +198,7 @@ if ($rebootNeeded) {
 }
 
 Write-Host "Next, in a NORMAL (non-elevated) session:" -ForegroundColor Gray
-Write-Host "  .\install.ps1 -Profile pro   packages, including the wsl group" -ForegroundColor Gray
+Write-Host "  .\install-packages.ps1 -Profile pro   packages, including the wsl group" -ForegroundColor Gray
 Write-Host "  .\get-dotfiles.ps1           your GitHub key, the clone, and your configuration" -ForegroundColor Gray
 Write-Host ""
 }

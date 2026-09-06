@@ -4,7 +4,7 @@
 # bootstrap.sh - Arranque de una Mac nueva
 # ============================================================================
 # Uso:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/alejakun/dotfiles-bootstrap/main/bin/bootstrap.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/alejakun/bootstrap/master/macos/bootstrap.sh)
 #
 # Instala lo mínimo para poder clonar el repositorio privado de dotfiles y le
 # entrega el control a su instalador. Todo lo demás vive allá: paquetes,
@@ -131,9 +131,9 @@ print_success "Usuario de GitHub: $GH_USER"
 # idénticos es lo que hace que todas las vías produzcan la misma llave.
 #
 # Son tres copias, y hay que cambiarlas juntas:
-#   dotfiles-bootstrap/bin/bootstrap.sh  este (arranque de una Mac)
-#   dotfiles/bin/gh-setup-ssh      rotación, y hosts Unix
-#   dotfiles-win/get-dotfiles.ps1        arranque de Windows
+#   macos/bootstrap.sh                   este (arranque de una Mac)
+#   dotfiles/bin/gh-setup-ssh            rotacion, y hosts Unix
+#   windows/get-dotfiles.ps1             arranque de Windows
 
 KEY="$HOME/.ssh/id_ed25519"
 
