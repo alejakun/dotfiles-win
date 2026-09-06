@@ -21,7 +21,7 @@ all under `Microsoft.Office`. Left to winget, the installer would treat the
 machine as bare and run Click-to-Run over the existing suite, which can change
 its edition, update channel or language.
 
-`install.ps1` therefore does not ask winget about this one. It looks for Word or
+`install-packages.ps1` therefore does not ask winget about this one. It looks for Word or
 Excel directly, through the App Paths registry keys that Click-to-Run, MSI and
 retail installs all write, plus the Click-to-Run configuration key. If any of
 them is there, Office is reported as already installed and skipped.

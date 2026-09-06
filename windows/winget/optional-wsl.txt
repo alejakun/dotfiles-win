@@ -1,7 +1,7 @@
 # ================================================================================
 # Optional group - Linux on Windows (WSL)
 # ================================================================================
-# Read by install.ps1. The three fields below drive the prompt:
+# Read by install-packages.ps1. The three fields below drive the prompt:
 #
 # Label:   Windows Subsystem for Linux
 # Offer:   pro

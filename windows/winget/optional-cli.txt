@@ -1,7 +1,7 @@
 # ================================================================================
 # Optional group - Modern command-line tools
 # ================================================================================
-# Read by install.ps1. The three fields below drive the prompt:
+# Read by install-packages.ps1. The three fields below drive the prompt:
 #
 # Label:   Modern command-line tools
 # Offer:   pro

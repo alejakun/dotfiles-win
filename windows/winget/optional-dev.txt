@@ -1,7 +1,7 @@
 # ================================================================================
 # Optional group - Programming runtimes and database client
 # ================================================================================
-# Read by install.ps1. The three fields below drive the prompt:
+# Read by install-packages.ps1. The three fields below drive the prompt:
 #
 # Label:   Programming runtimes and database client
 # Offer:   pro

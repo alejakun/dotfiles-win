@@ -1,17 +1,17 @@
 #!/usr/bin/env pwsh
 # ================================================================================
-# dotfiles-win Bootstrap Installer
+# Windows Bootstrap Installer
 # ================================================================================
 # One-line installation (mini profile - default):
-#   iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+#   iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap.ps1 | iex
 #
 # Install a specific profile. Each one extends the ones below it, so "pro"
 # installs mini + base + pro:
-#   $env:DOTFILES_PROFILE="base"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
-#   $env:DOTFILES_PROFILE="pro"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+#   $env:DOTFILES_PROFILE="base"; iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap.ps1 | iex
+#   $env:DOTFILES_PROFILE="pro"; iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap.ps1 | iex
 #
 # Preview without installing anything (no git and no elevation needed):
-#   $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/dotfiles-win/master/bootstrap.ps1 | iex
+#   $env:DOTFILES_DRYRUN="1"; iwr -useb https://raw.githubusercontent.com/alejakun/bootstrap/master/windows/bootstrap.ps1 | iex
 #
 # Without elevation it asks whether to continue and install only what does not
 # need it - that is the second pass to run from another account.
@@ -84,15 +84,17 @@ function Invoke-DotfilesBootstrap {
 
     # Configuration
     $RepoOwner = "alejakun"
-    $RepoName = "dotfiles-win"
+    $RepoName = "bootstrap"
     $Branch = if ($env:DOTFILES_BRANCH) { $env:DOTFILES_BRANCH } else { "master" }
-    $BaseUrl = "https://raw.githubusercontent.com/$RepoOwner/$RepoName/$Branch"
-    $InstallDir = Join-Path $env:TEMP "dotfiles-win-install"
+    # /windows al final: desde el 2026-09-05 este repo lleva las dos plataformas,
+    # cada una en su carpeta, y todo lo que se descarga aqui vive bajo windows/.
+    $BaseUrl = "https://raw.githubusercontent.com/$RepoOwner/$RepoName/$Branch/windows"
+    $InstallDir = Join-Path $env:TEMP "dotfiles-bootstrap-install"
 
     # Header
     Write-Host ""
     Write-Host "=========================================" -ForegroundColor Cyan
-    Write-Host "   dotfiles-win Bootstrap Installer" -ForegroundColor Cyan
+    Write-Host "   Windows Bootstrap Installer" -ForegroundColor Cyan
     Write-Host "=========================================" -ForegroundColor Cyan
     Write-Host ""
 
@@ -181,13 +183,13 @@ function Invoke-DotfilesBootstrap {
     # Download installation files
     Write-Step "Downloading installation files from GitHub..."
 
-    # install.ps1 owns the ladder and decides which optional groups apply, so just
+    # install-packages.ps1 owns the ladder and decides which optional groups apply, so just
     # fetch every list - they are a few hundred bytes each and this keeps those
     # rules in one place.
     $allProfiles = @("mini", "base", "pro")
     $allGroups = @("extras", "cli", "dev", "cloud", "infra", "wsl")
 
-    # Recreate the repository layout install.ps1 expects
+    # Recreate the repository layout install-packages.ps1 expects
     New-Item -ItemType Directory -Path (Join-Path $InstallDir "winget") -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $InstallDir "npm") -Force | Out-Null
 
@@ -196,9 +198,9 @@ function Invoke-DotfilesBootstrap {
     # it asks for every one and lets the answer decide.
     $files = @(
         @{
-            Url = "$BaseUrl/install.ps1"
-            Path = Join-Path $InstallDir "install.ps1"
-            Name = "install.ps1"
+            Url = "$BaseUrl/install-packages.ps1"
+            Path = Join-Path $InstallDir "install-packages.ps1"
+            Name = "install-packages.ps1"
         }
     )
 
@@ -268,8 +270,8 @@ function Invoke-DotfilesBootstrap {
         return
     }
 
-    if (-not (Test-Path (Join-Path $InstallDir "install.ps1"))) {
-        Write-Err "install.ps1 was not found in the repository"
+    if (-not (Test-Path (Join-Path $InstallDir "install-packages.ps1"))) {
+        Write-Err "install-packages.ps1 was not found in the repository"
         Write-Host "Branch: $Branch" -ForegroundColor Gray
         return
     }
@@ -280,10 +282,10 @@ function Invoke-DotfilesBootstrap {
 
     try {
         # This script is run from memory by iex, which the execution policy does
-        # not apply to. install.ps1 is a file on disk, so it does - and Restricted
+        # not apply to. install-packages.ps1 is a file on disk, so it does - and Restricted
         # is the default on Windows client. Run it in a child process with the
         # policy bypassed rather than changing the policy of the user's session.
-        $installScript = Join-Path $InstallDir "install.ps1"
+        $installScript = Join-Path $InstallDir "install-packages.ps1"
         $psExe = if ($PSVersionTable.PSEdition -eq "Core") { "pwsh" } else { "powershell" }
 
         $psArgs = @(
@@ -299,7 +301,7 @@ function Invoke-DotfilesBootstrap {
             $psArgs += "-SkipAdminCheck"
         }
 
-        # -File sets $PSScriptRoot for install.ps1, so it finds the package lists
+        # -File sets $PSScriptRoot for install-packages.ps1, so it finds the package lists
         # without needing us to move the user's working directory
         & $psExe @psArgs
         $exitCode = $LASTEXITCODE

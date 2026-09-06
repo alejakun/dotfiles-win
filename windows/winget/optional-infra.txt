@@ -1,9 +1,9 @@
 # ================================================================================
-# Optional group - Cloud provider CLIs
+# Optional group - Containers and virtualization
 # ================================================================================
-# Read by install.ps1. The three fields below drive the prompt:
+# Read by install-packages.ps1. The three fields below drive the prompt:
 #
-# Label:   Cloud provider CLIs
+# Label:   Containers and virtualization
 # Offer:   pro
 # Default: 
 #
@@ -12,6 +12,6 @@
 # Defaulting to no is deliberate: undoing an unwanted install costs more than
 # running again when you notice something missing.
 
-# Cloud CLI Tools
-Google.CloudSDK
-Amazon.AWSCLI
+# Containers & Virtualization
+Docker.DockerDesktop
+Hashicorp.Vagrant

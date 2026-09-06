@@ -1,7 +1,7 @@
 # ================================================================================
 # Optional group - Remote support tools and Earth Pro
 # ================================================================================
-# Read by install.ps1. The three fields below drive the prompt:
+# Read by install-packages.ps1. The three fields below drive the prompt:
 #
 # Label:   Remote support tools and Earth Pro
 # Offer:   mini

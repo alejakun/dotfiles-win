@@ -1,23 +1,30 @@
+# Union de los dos repositorios fusionados el 2026-09-05: lo de Windows venia de
+# dotfiles-win y lo de macOS de dotfiles-bootstrap.
+
 # Windows
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *.lnk
 
-# Temporary files
+# macOS
+.DS_Store
+._*
+
+# Temporales
 *.tmp
 *.temp
 *.log
 *.bak
 *.swp
+*.swo
+*~
+tmp/
+temp/
 
-# Editor directories
+# Editores
 .vscode/
 .idea/
-
-# macOS (for development on Mac)
-.DS_Store
-._*
 
 # AI
 CLAUDE.md
